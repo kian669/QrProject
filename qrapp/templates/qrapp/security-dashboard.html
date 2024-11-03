@@ -1,0 +1,144 @@
+{% extends 'qrapp/base.html' %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Officer Dashboard</title>
+    <style>
+        .dashboard-header {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            border-bottom: 1px solid #495057;
+        }
+        .dashboard-card {
+            border: none;
+            border-radius: 10px;
+            background-color: #343a40;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .dashboard-card-body {
+            padding: 20px;
+        }
+        .card-header {
+            background-color: #495057;
+            border-bottom: 1px solid #6c757d;
+        }
+        .card-body {
+            background-color: #343a40;
+        }
+        .table th, .table td {
+            color: #ffffff;
+        }
+        .table thead th {
+            background-color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <header class="dashboard-header d-flex justify-content-between align-items-center">
+        <h1 class="h3">Security Officer Dashboard</h1>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                User Menu
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="userMenu">
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><a class="dropdown-item" href="#">Logout</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Overview Card -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Total Incidents</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1>45</h1>
+                        <p class="mb-0">This Month</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Active Alerts Card -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Active Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1>12</h1>
+                        <p class="mb-0">Currently Active</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Scheduled Patrols Card -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Scheduled Patrols</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1>8</h1>
+                        <p class="mb-0">This Week</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Completed Tasks Card -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Completed Tasks</h5>
+                    </div>
+                    <div class="card-body">
+                        <h1>78</h1>
+                        <p class="mb-0">Total</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Incident Reports Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Recent Incident Reports</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-dark table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>101</td>
+                            <td>2024-09-05</td>
+                            <td>Burglary</td>
+                            <td>Main Entrance</td>
+                            <td>Resolved</td>
+                        </tr>
+                        <tr>
+                            <td>102</td>
+                            <td>2024-09-06</td>
+                            <td>Suspicious Activity</td>
+                            <td>Parking Lot</td>
+                            <td>In Progress</td>
+                        </tr>
+                        <!-- More rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

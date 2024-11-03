@@ -1,0 +1,44 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4 text-primary">Students Login</h2>
+        
+        <form id="loginForm" method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <!-- Render form fields dynamically -->
+            <div class="mb-3">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                <div class="invalid-feedback">Please enter your username.</div>
+            </div>
+            <div class="mb-3">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                <div class="invalid-feedback">Please enter your password.</div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+
+            <div class="text-end mt-3">
+                <a href="#" class="text-primary text-decoration-none">Forgot Password?</a>
+            </div>
+        </form>
+
+        <!-- Display messages -->
+        {% if messages %}
+            <div class="alert alert-danger mt-3">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <div class="text-center mt-4">
+            <p class="mb-0">Don't have an account?</p>
+            <a href="{% url 'stud-reg' %}" class="btn btn-secondary mt-2">Register</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

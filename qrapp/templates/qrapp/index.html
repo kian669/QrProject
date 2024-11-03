@@ -1,0 +1,122 @@
+{% extends 'qrapp/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="vh-100 d-flex justify-content-center align-items-center position-relative" style="background-color: #f1f1f1;">
+    <div class="position-absolute w-100 h-100" style="background: url('{% static 'img/hero-bg.jpg' %}') no-repeat center center; background-size: cover; opacity: 0.5;"></div>
+
+    <!-- Car Animation -->
+    {% comment %} <div class="car-animation position-absolute">
+        <img src="{% static 'img/car4.png' %}" alt="Moving Car" class="animate__animated animate__slideInLeft" style="max-width: 150px;"> <!-- Reduced size -->
+    </div> {% endcomment %}
+
+    <div class="text-center position-relative z-index-2">
+        <!-- Logo -->
+        <img src="{% static 'img/pit.png' %}" alt="Logo" class="mb-4" style="max-width: 120px;">
+        
+        <!-- Title and Subtitle -->
+        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">Vehicle Monitoring System</h1>
+        <p class="lead animate__animated animate__fadeInUp">Streamlining vehicle management for a safer community</p>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5 bg-light text-dark">
+    <div class="container text-center">
+        <h2 class="fw-bold text-uppercase mb-4 text-success">Our Features</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-speedometer2 display-3 text-success mb-3"></i>
+                        <h5 class="card-title">Real-time Monitoring</h5>
+                        <p class="card-text">Track vehicles in real-time to enhance security and efficiency.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-bar-chart-line-fill display-3 text-success mb-3"></i>
+                        <h5 class="card-title">Detailed Analytics</h5>
+                        <p class="card-text">Access comprehensive reports and analytics to make data-driven decisions.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <i class="bi bi-lock-fill display-3 text-success mb-3"></i>
+                        <h5 class="card-title">Enhanced Security</h5>
+                        <p class="card-text">Ensure safety with advanced security measures for vehicles.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="py-5 bg-white text-dark">
+    <div class="container text-center">
+        <h2 class="fw-bold text-uppercase mb-4 text-success">About Us</h2>
+        <p class="lead">Our mission is to provide seamless vehicle monitoring solutions, helping organizations maintain safety and efficiency. With cutting-edge technology and a dedicated team, we ensure top-notch service for all our clients.</p>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="py-5 bg-light text-dark">
+    <div class="container">
+        <h2 class="fw-bold text-uppercase mb-4 text-success text-center">Get In Touch</h2>
+        <div class="row">
+            <!-- Contact Form -->
+            <div class="col-md-6 mb-4">
+                <form>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Your Name</label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Your Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success px-4 py-2">Send Message</button>
+                </form>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="col-md-6 text-center">
+                <h5>Email Us</h5>
+                <p><a href="mailto:info@yourwebsite.com" class="text-success">info@yourwebsite.com</a></p>
+                <h5>Call Us</h5>
+                <p><a href="tel:+1234567890" class="text-success">+123 456 7890</a></p>
+                <h5>Visit Us</h5>
+                <p>123 Business Street, Your City, Your Country</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Car Animation */
+    .car-animation {
+        animation: moveCar 10s linear infinite;
+        bottom: 0; /* Car is on the ground */
+        left: -150px; /* Start off-screen */
+    }
+
+    @keyframes moveCar {
+        0% { left: -150px; } /* Start off-screen */
+        100% { left: 100%; } /* Move to the right off-screen */
+    }
+</style>
+{% endblock %}

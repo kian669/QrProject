@@ -1,0 +1,118 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<div class="container-fluid bg-light vh-100 d-flex justify-content-center align-items-center">
+    <div class="row w-100">
+        <div class="col-md-12">
+            <h2 class="text-center text-primary mb-4">Student Dashboard Analytics</h2>
+
+            <!-- Analytics Section -->
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Course Distribution</h5>
+                            <canvas id="courseChart" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Year-wise Enrollment</h5>
+                            <canvas id="yearChart" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Major Enrollment Stats</h5>
+                            <canvas id="majorChart" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Monthly Registration Trends</h5>
+                            <canvas id="registrationChart" width="200" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Course Distribution Chart
+    var ctx1 = document.getElementById('courseChart').getContext('2d');
+    var courseChart = new Chart(ctx1, {
+        type: 'doughnut',
+        data: {
+            labels: ['Computer Science', 'Engineering', 'Business', 'Arts', 'Other'],
+            datasets: [{
+                label: 'Course Distribution',
+                data: [120, 90, 80, 60, 40],
+                backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d']
+            }]
+        }
+    });
+
+    // Year-wise Enrollment Chart
+    var ctx2 = document.getElementById('yearChart').getContext('2d');
+    var yearChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+            labels: ['1st Year', '2nd Year', '3rd Year', '4th Year'],
+            datasets: [{
+                label: 'Students',
+                data: [150, 130, 110, 90],
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Major Enrollment Stats
+    var ctx3 = document.getElementById('majorChart').getContext('2d');
+    var majorChart = new Chart(ctx3, {
+        type: 'polarArea',
+        data: {
+            labels: ['CS', 'IT', 'ECE', 'ME', 'BBA'],
+            datasets: [{
+                label: 'Major Stats',
+                data: [50, 40, 30, 20, 10],
+                backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d']
+            }]
+        }
+    });
+
+    // Monthly Registration Trends
+    var ctx4 = document.getElementById('registrationChart').getContext('2d');
+    var registrationChart = new Chart(ctx4, {
+        type: 'line',
+        data: {
+            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            datasets: [{
+                label: 'Registrations',
+                data: [20, 40, 50, 30, 70, 60, 90, 80, 60, 100, 110, 120],
+                borderColor: '#007bff',
+                fill: false
+            }]
+        }
+    });
+</script>
+{% endblock %}

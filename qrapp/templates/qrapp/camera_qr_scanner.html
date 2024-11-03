@@ -1,0 +1,294 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js"></script>
+
+<div class="container">
+    <!-- Title Section -->
+    <h2 class="text-center my-4" style="font-weight: 700; color: #007bff; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);">Scan QR Code</h2>
+    
+    <div class="d-flex justify-content-center">
+        <!-- Video Container -->
+        <div class="position-relative video-container" style="width: 100%; max-width: 640px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); overflow: hidden;">
+            <video id="video" class="img-fluid" autoplay style="width: 100%; height: auto;"></video>
+
+            <!-- Backdrop with Transparent Center for QR Frame -->
+            <div class="backdrop" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);">
+                <!-- Transparent center area for QR scanning -->
+                <div style="position: absolute; top: 50%; left: 50%; width: 200px; height: 200px; transform: translate(-50%, -50%); background: transparent; z-index: 2;"></div>
+            </div>
+
+            <!-- QR Frame with White Color and Smooth Animation -->
+            <div class="qr-frame" style="position: absolute; top: 50%; left: 50%; width: 200px; height: 200px; transform: translate(-50%, -50%); border: 4px solid white; border-radius: 10px; animation: pulse-border 2s infinite;"></div>
+        </div>
+    </div>
+
+    <!-- Camera Selection Dropdown -->
+    <div class="d-flex justify-content-center my-3">
+        <div class="d-flex align-items-center">
+            <ion-icon name="camera-outline" size="large" style="margin-right: 8px;"></ion-icon>
+            <select id="cameraSelect" class="form-select w-auto">
+                <option value="environment">Back Camera</option>
+                <option value="user">Front Camera</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- QR Data Display -->
+    <div class="text-center mt-3">
+        <p id="qrData" class="alert alert-info" style="display: none;"></p>
+    </div>
+
+    <!-- Modal for Violation Information -->
+    <div class="modal fade" id="studentInfoModal" tabindex="-1" aria-labelledby="studentInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentInfoModalLabel">Violations</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="violationForm" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="studentName" class="form-label">Student Name</label>
+                            <input type="text" class="form-control" id="studentName" name="username" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="first_name" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="last_name" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentID" class="form-label">Student ID</label>
+                            <input type="text" class="form-control" id="studentID" name="student_id" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="vehicleType" class="form-label">Vehicle Type</label>
+                            <select class="form-select" id="vehicleType" name="vehicle_type">
+                                <option selected>Choose...</option>
+                                <option value="Motorcycle">Motorcycle</option>
+                                <option value="Car">Car</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="violations" class="form-label">Violations</label>
+                            <select class="form-select" id="violations" name="violations">
+                                <option selected>Choose...</option>
+                                <option value="Illegal Parking">Illegal Parking</option>
+                                <option value="No Helmet">No Helmet</option>
+                                <option value="No License">No License</option>
+                                <option value="No Register">No Register</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitViolationForm()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    /* Animation for QR Frame */
+    @keyframes pulse-border {
+        0% { border-color: rgba(255, 255, 255, 0.6); }
+        100% { border-color: rgba(255, 255, 255, 1); }
+    }
+
+    .qr-frame {
+        border-radius: 10px;
+    }
+
+    .alert {
+        display: block;
+    }
+
+    .video-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .backdrop {
+        z-index: 1;
+    }
+
+    video {
+        position: relative;
+        z-index: 0;
+    }
+
+    .qr-frame {
+        z-index: 2;
+    }
+
+    .qr-corner {
+        z-index: 3;
+    }
+
+    .qr-frame {
+        background: transparent;
+    }
+
+    .backdrop {
+        clip-path: inset(0px 0px 0px 0px);
+    }
+</style>
+
+ 
+<script>
+    $(document).ready(function () {
+            $('#violationsTable').DataTable({
+                "paging": true,        
+                "searching": true,     
+                "lengthChange": true,  
+                "pageLength": 5,       
+                "info": true           
+            });
+        });
+        
+        function submitViolationForm() {
+            const form = document.getElementById('violationForm');
+            const formData = new FormData(form);
+        
+            fetch('/submit_violation/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Violation saved successfully!');
+                    var studentInfoModal = bootstrap.Modal.getInstance(document.getElementById('studentInfoModal'));
+                    if (studentInfoModal) {
+                        studentInfoModal.hide();
+                    }
+                } else {
+                    alert('Error saving violation');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+        
+        const video = document.getElementById('video');
+        const qrData = document.getElementById('qrData');
+        let lastScannedData = '';
+        let currentStream = null;
+        let isScanningAllowed = true;
+        let lastScanTime = 0; // Track last scan time
+        
+        function startCamera(facingMode) {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: facingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            }).then(function(stream) {
+                currentStream = stream;
+                video.srcObject = stream;
+            }).catch(function(error) {
+                console.error('Error accessing the camera: ', error);
+                alert('Camera access failed. Please ensure camera permissions are granted.');
+            });
+        }
+        
+        document.getElementById('cameraSelect').addEventListener('change', function() {
+            startCamera(this.value);
+        });
+        
+        // Start with back camera by default for mobile
+        startCamera('environment');
+        
+        setInterval(function() {
+            if (!isScanningAllowed || video.videoWidth === 0 || video.videoHeight === 0) {
+                return; // Video is not ready, or scanning is not allowed
+            }
+        
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+            canvas.toBlob(function(blob) {
+                if (blob) {
+                    const formData = new FormData();
+                    formData.append('frame', blob, 'frame.png');
+        
+                    fetch('/scan_qr_code/', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const currentTime = Date.now();
+        
+                        if (data.qr_code_data) {
+                            // Check if the same QR code was scanned recently
+                            if (data.qr_code_data === lastScannedData && (currentTime - lastScanTime < 2000)) {
+                                return; // Prevent scanning the same QR code within 2 seconds
+                            }
+        
+                            // Update the last scan time and data
+                            lastScanTime = currentTime;
+                            lastScannedData = data.qr_code_data;
+        
+                            qrData.textContent = "";
+        
+                            if (data.type === 'url') {
+                                qrData.textContent = "QR Code Data (URL): " + data.qr_code_data;
+                                window.open(data.qr_code_data, '_blank');
+                            } else if (data.type === 'text') {
+                                qrData.textContent = "QR Code Data (Text): " + data.qr_code_data;
+                            } else {
+                                qrData.textContent = "Student ID: " + data.student_id + ", Name: " + data.student_name;
+                            }
+        
+                            if (data.student_name) {
+                                document.getElementById('studentName').value = data.student_name;
+                                document.getElementById('studentID').value = data.student_id;
+                                document.getElementById('firstName').value = data.first_name || ''; // Assuming data.first_name exists
+                                document.getElementById('lastName').value = data.last_name || ''; // Assuming data.last_name exists
+    
+        
+                                // Check if modal is already active, hide if so
+                                const studentInfoModal = bootstrap.Modal.getInstance(document.getElementById('studentInfoModal'));
+                                if (studentInfoModal) {
+                                    studentInfoModal.hide();
+                                }
+        
+                                // Show the modal
+                                const newModal = new bootstrap.Modal(document.getElementById('studentInfoModal'));
+                                newModal.show();
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error processing QR code:', error));
+                } else {
+                    console.error('Blob creation failed');
+                }
+            }, 'image/png');
+        }, 1000);
+        </script>
+
+{% endblock %}

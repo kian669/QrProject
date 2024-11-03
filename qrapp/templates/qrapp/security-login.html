@@ -1,0 +1,39 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="login-container bg-white shadow rounded p-4" style="max-width: 400px; width: 100%;">
+        <div class="text-center mb-4">
+            <h1 class="h3 mb-3 fw-normal">Security Officer Login</h1>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label">{{ form.username.label }}</label>
+                {{ form.username }}
+                {% for error in form.username.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">{{ form.password.label }}</label>
+                {{ form.password }}
+                {% for error in form.password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">{{ form.confirm_password.label }}</label>
+                {{ form.confirm_password }}
+                {% for error in form.confirm_password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="#" class="link-secondary">Forgot your password?</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

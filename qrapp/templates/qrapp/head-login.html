@@ -1,0 +1,34 @@
+<!-- qrapp/templates/qrapp/login.html -->
+{% extends "qrapp/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center vh-100">
+    <div class="login-container bg-white shadow rounded p-4" style="max-width: 400px; width: 100%;">
+        <div class="text-center mb-4">
+            <h2 class="h3 mb-3 fw-normal">Head Login</h2>
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                <div class="text-danger">{{ form.username.errors }}</div>
+            </div>
+
+            <div class="mb-3">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+                <div class="text-danger">{{ form.password.errors }}</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="#" class="link-secondary">Forgot your password?</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

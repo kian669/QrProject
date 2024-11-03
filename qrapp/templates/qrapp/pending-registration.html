@@ -1,0 +1,133 @@
+{% extends "qrapp/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Pending Registrations</h2>
+    <table id="registrationsTable" class="table table-striped table-bordered">
+        <thead class="table-primary">
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Course</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for registration in registrations %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ registration.username }}</td>
+                <td>{{ registration.email }}</td>
+                <td>{{ registration.course }}</td>
+                <td>
+                    <a href="#" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#studentModal"
+                       data-id="{{ registration.id }}" data-username="{{ registration.username }}"
+                       data-email="{{ registration.email }}" data-first-name="{{ registration.first_name }}"
+                       data-last-name="{{ registration.last_name }}" data-course="{{ registration.course }}"
+                       data-year="{{ registration.year }}" data-major="{{ registration.major }}"
+                       data-or-upload="{{ registration.or_upload.url }}" data-cr-upload="{{ registration.cr_upload.url }}"
+                       data-license-upload="{{ registration.license_upload.url }}">View</a>
+                    <a href="{% url 'approve_student' registration.id %}" class="btn btn-success btn-sm">Approve</a>
+                    <a href="#" class="btn btn-danger btn-sm">Reject</a>
+                </td>
+                
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">No pending registrations</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentModalLabel">Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Username:</strong> <span id="modalUsername"></span></p>
+                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                <p><strong>First Name:</strong> <span id="modalFirstName"></span></p>
+                <p><strong>Last Name:</strong> <span id="modalLastName"></span></p>
+                <p><strong>Course:</strong> <span id="modalCourse"></span></p>
+                <p><strong>Year:</strong> <span id="modalYear"></span></p>
+                <p><strong>Major:</strong> <span id="modalMajor"></span></p>
+                <p><strong>OR Upload:</strong> <a id="modalOrUpload" href="#" target="_blank">View</a></p>
+                <p><strong>CR Upload:</strong> <a id="modalCrUpload" href="#" target="_blank">View</a></p>
+                <p><strong>License Upload:</strong> <a id="modalLicenseUpload" href="#" target="_blank">View</a></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/dataTables.bootstrap5.min.css">
+
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize DataTable
+    $('#registrationsTable').DataTable({
+      "autoWidth": false,
+      "columnDefs": [
+          { "width": "5%", "targets": 0 }, // For the counter column
+          { "width": "20%", "targets": 1 }, // Adjust other columns if needed
+          { "width": "20%", "targets": 2 },
+          { "width": "20%", "targets": 3 },
+          { "width": "35%", "targets": 4 }  // Actions column might need more width
+      ]
+    });
+  
+    // Modal data population
+    var studentModal = document.getElementById('studentModal');
+    studentModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var username = button.getAttribute('data-username');
+        var email = button.getAttribute('data-email');
+        var firstName = button.getAttribute('data-first-name');
+        var lastName = button.getAttribute('data-last-name');
+        var course = button.getAttribute('data-course');
+        var year = button.getAttribute('data-year');
+        var major = button.getAttribute('data-major');
+        var orUpload = button.getAttribute('data-or-upload');
+        var crUpload = button.getAttribute('data-cr-upload');
+        var licenseUpload = button.getAttribute('data-license-upload');
+
+        // Populate modal fields
+        studentModal.querySelector('#modalUsername').textContent = username;
+        studentModal.querySelector('#modalEmail').textContent = email;
+        studentModal.querySelector('#modalFirstName').textContent = firstName;
+        studentModal.querySelector('#modalLastName').textContent = lastName;
+        studentModal.querySelector('#modalCourse').textContent = course;
+        studentModal.querySelector('#modalYear').textContent = year;
+        studentModal.querySelector('#modalMajor').textContent = major;
+        studentModal.querySelector('#modalOrUpload').href = orUpload;
+        studentModal.querySelector('#modalCrUpload').href = crUpload;
+        studentModal.querySelector('#modalLicenseUpload').href = licenseUpload;
+    });
+  });
+</script>
+{% endblock %}

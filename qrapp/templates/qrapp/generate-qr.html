@@ -1,0 +1,22 @@
+<!-- qr_display.html -->
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="text-center mb-4">QR Code Generator</h2>
+    <form method="get" action="{% url 'generate_qr_code' %}" class="text-center">
+        <div class="mb-3">
+            <label for="data" class="form-label">Data</label>
+            <input type="text" id="data" name="data" class="form-control" placeholder="Enter data for QR code" value="{{ data }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Generate QR</button>
+    </form>
+
+    {% if qr_code_url %}
+    <div class="mt-4 text-center">
+        <h4>Generated QR Code:</h4>
+        <img src="data:image/png;base64,{{ qr_code_url|safe }}" alt="QR Code" class="img-fluid">
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<style>
+    .table thead th {
+        background-color: #007bff; /* Header background color */
+        color: white; /* Header text color */
+    }
+    .table tbody tr:hover {
+        background-color: #f2f2f2; /* Row hover effect */
+    }
+</style>
+
+<div class="container my-1">
+    <h2 class="text-center mb-4">Approved Students (Master List)</h2>
+    <table id="masterListTable" class="table table-striped table-bordered table-hover" style="width:100%">
+        <thead>
+            <tr>
+                <th>Student ID</th>
+                <th>Full Name</th> 
+                <th>Email</th>
+                <th>Course</th>
+                <th>Year</th>
+                <th>Major</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in master_list_students %}
+            <tr>
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.first_name }} {{ student.last_name }}</td>
+                <td>{{ student.email }}</td>
+                <td>{{ student.course }}</td>
+                <td>{{ student.year }}</td>
+                <td>{{ student.major }}</td>
+                <td>
+                    <button class="btn btn-info btn-sm view-btn" data-id="{{ student.id }}" data-bs-toggle="modal" data-bs-target="#viewStudentModal">View</button>
+                    <button class="btn btn-warning btn-sm update-btn" data-id="{{ student.id }}" data-bs-toggle="modal" data-bs-target="#updateStudentModal">Update</button>
+                </td>
+                
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No approved students yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal for Viewing Student Details -->
+<div class="modal fade" id="viewStudentModal" tabindex="-1" aria-labelledby="viewStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewStudentModalLabel">Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Student ID:</strong> <span id="modalStudentId"></span></p>
+                <p><strong>Username:</strong> <span id="modalUsername"></span></p>
+                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+                <p><strong>First Name:</strong> <span id="modalFirstName"></span></p>
+                <p><strong>Last Name:</strong> <span id="modalLastName"></span></p>
+                <p><strong>Course:</strong> <span id="modalCourse"></span></p>
+                <p><strong>Year:</strong> <span id="modalYear"></span></p>
+                <p><strong>Major:</strong> <span id="modalMajor"></span></p>
+                <p><strong>OR Upload:</strong> <a id="modalOrUpload" href="#" target="_blank">View</a></p>
+                <p><strong>CR Upload:</strong> <a id="modalCrUpload" href="#" target="_blank">View</a></p>
+                <p><strong>License Upload:</strong> <a id="modalLicenseUpload" href="#" target="_blank">View</a></p>
+                <p><strong>QR Code:</strong> <img id="modalQrCode" src="" alt="QR Code" class="img-fluid" style="max-width: 150px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="updateStudentModal" tabindex="-1" aria-labelledby="updateStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateStudentModalLabel">Update Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="updateStudentForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" id="updateStudentId" name="id">
+                    <div class="mb-3">
+                        <label for="updateUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="updateUsername" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="updateEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateCourse" class="form-label">Course</label>
+                        <input type="text" class="form-control" id="updateCourse" name="course">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateYear" class="form-label">Year</label>
+                        <input type="text" class="form-control" id="updateYear" name="year">
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateMajor" class="form-label">Major</label>
+                        <input type="text" class="form-control" id="updateMajor" name="major">
+                    </div>
+                    <!-- Add other fields for uploads as needed -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Include jQuery, Bootstrap, and DataTables JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable
+        $('#masterListTable').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "language": {
+                "search": "Filter records:"
+            }
+        });
+
+        // Handle the View button click
+        $('.view-btn').click(function() {
+            var studentId = $(this).data('id');
+            // Fetch student details via AJAX
+            $.ajax({
+                url: '{% url "student_details" %}',  // Assuming you have a URL named 'student_details' that returns JSON data
+                data: {
+                    student_id: studentId
+                },
+                success: function(data) {
+                    // Populate modal with student data
+                    $('#modalStudentId').text(data.student_id);
+                    $('#modalUsername').text(data.username);
+                    $('#modalEmail').text(data.email);
+                    $('#modalFirstName').text(data.first_name);
+                    $('#modalLastName').text(data.last_name);
+                    $('#modalCourse').text(data.course);
+                    $('#modalYear').text(data.year);
+                    $('#modalMajor').text(data.major);
+                    $('#modalOrUpload').attr('href', data.or_upload);
+                    $('#modalCrUpload').attr('href', data.cr_upload);
+                    $('#modalLicenseUpload').attr('href', data.license_upload);
+                    $('#modalQrCode').attr('src', data.qr_code);  // Display QR code if available
+                },
+                error: function() {
+                    alert('Failed to fetch student details.');
+                }
+            });
+        });
+    });
+
+
+
+    $(document).ready(function() {
+        // Handle the Update button click
+        $('.update-btn').click(function() {
+            var studentId = $(this).data('id');
+            // Fetch student details via AJAX
+            $.ajax({
+                url: '{% url "student_details" %}',  // Assuming you have a URL named 'student_details'
+                data: {
+                    student_id: studentId  // Use correct field to match the form input name
+                },
+                success: function(data) {
+                    // Populate the update form with student data
+                    $('#updateStudentId').val(studentId);  // Correctly set the ID
+                    $('#updateUsername').val(data.username);
+                    $('#updateEmail').val(data.email);
+                    $('#updateCourse').val(data.course);
+                    $('#updateYear').val(data.year);
+                    $('#updateMajor').val(data.major);
+                },
+                error: function() {
+                    alert('Failed to fetch student details for update.');
+                }
+            });
+        });
+        
+    });
+    
+
+    $('#updateStudentForm').submit(function(e) {
+        e.preventDefault();
+        var formData = $(this).serialize();  // Serialize form data
+        $.ajax({
+            url: '{% url "update_student" %}',  // Update with your update URL
+            type: 'POST',
+            data: formData,
+            success: function(response) {
+                // Reload page or table after successful update
+                location.reload();
+            },
+            error: function() {
+                alert('Failed to update student details.');
+            }
+        });
+    });
+
+</script>
+{% endblock %}
