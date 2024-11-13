@@ -86,6 +86,9 @@ DATABASES = {
 }
 
 
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -145,3 +148,4 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'pitad21.barrokianfrancis@gmail.com'  # Replace with your email
 EMAIL_HOST_PASSWORD = 'rabp sraf noym uyno'  # Replace with your app-specific password or actual password
 DEFAULT_FROM_EMAIL = 'pitad21.barrokianfrancis@gmail.com'
+

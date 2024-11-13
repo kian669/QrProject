@@ -44,19 +44,23 @@
             </div>
         </div>
 
-        <!-- DataTable on the right side -->
-        <div class="col-md-8">
-            <div class="card shadow-lg" style="background-color: #ffffff; border: none;">
-                <div class="card-header bg-success text-white">
-                    <h4>Students Data</h4>
-                </div>
-                <div class="card-body">
+      <!-- DataTable on the right side -->
+      <div class="col-md-8">
+        <div class="card shadow-lg" style="background-color: #ffffff; border: none;">
+            <div class="card-header bg-success text-white">
+                <h4>Students Data</h4>
+            </div>
+            <div class="card-body">
+                <!-- DataTable Wrapper with Fixed Height and Scrollable -->
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                     <table id="recentLogins" class="table table-striped table-bordered" style="color: #343a40; background-color: #ffffff;">
                         <thead>
                             <tr>
                                 <th>Student ID</th>
                                 <th>Name</th>
                                 <th>Course</th>
+                                <th>Log Type</th>
+                                <th>Log Time</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -67,6 +71,7 @@
             </div>
         </div>
     </div>
+</div>
 
     <!-- Real-time clock and date at the bottom -->
     <div class="row text-center mt-5" style="z-index: 1;">
@@ -76,7 +81,7 @@
         </div>
     </div>
 
-    <!-- Animated Welcome Message -->
+    {% comment %} <!-- Animated Welcome Message -->
     <div class="row" style="position: absolute; bottom: 20px; left: 0; right: 0; z-index: 1;">
         <div class="col-12 text-center">
             <div id="welcomeAnimation" style="white-space: nowrap; overflow: hidden; display: inline-block; font-size: 2.5rem; color: #21130d;">
@@ -84,7 +89,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> {% endcomment %}
 
 <!-- jQuery, Bootstrap 5.3, and DataTables CDN -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -196,7 +201,7 @@ updateTime();
 
     let lastScanTimes = {};  // Dictionary to track last scan times for each student
     const sameStudentInterval = 10000; // 1 minute for the same student
-    const differentStudentInterval = 500; // 1 second for different students
+    const differentStudentInterval = 200; // 1 second for different students
     
     async function scanFrame() {
         const video = document.getElementById('video');
@@ -241,7 +246,9 @@ updateTime();
                                     table.row.add([
                                         response.student.student_id,
                                         response.student.username,
-                                        response.student.course,
+                                        response.student.course, 
+                                        response.student.log_type,
+                                        response.student.log_time,
                                     ]).draw(false);
     
                                     // Reorder the table to keep the most recent entry on top
@@ -250,7 +257,7 @@ updateTime();
                                     // Show success notification
                                     Toastify({
                                         text: "QR Detected: " + response.student.username,
-                                        duration: 1000,
+                                        duration: 500,
                                         style: { background: "green" },
                                     }).showToast();
                                 }

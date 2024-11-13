@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .models import Student, StudentMasterList, Security, Violation,Logs
+from .models import Student, StudentMasterList, Security, Violation,Logs, Vehicle
 from .forms import StudentRegistrationForm  # Create this form separately
 from django.contrib import messages
 from datetime import datetime
@@ -33,8 +33,59 @@ from django.core.cache import cache
 from django.http import StreamingHttpResponse
 from .models import Violation
 from django.utils import timezone
+from django.db.models import Count
+from .forms import VehicleForm
+from datetime import timedelta
+from django.contrib.auth.models import User
+
+def unified_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Check for Student
+        try:
+            student = StudentMasterList.objects.get(username=username)
+            if student.check_password(password):
+                # Log the student in
+                request.session['user_type'] = 'student'
+                request.session['student_id'] = student.student_id
+                request.session['first_name'] = student.first_name
+                request.session['last_name'] = student.last_name
+                return redirect('stud-dashboard')
+        except StudentMasterList.DoesNotExist:
+            pass
+
+        # Check for Security
+        try:
+            security_officer = Security.objects.get(username=username)
+            if check_password(password, security_officer.password):
+                # Log the security officer in
+                request.session['user_type'] = 'security'
+                request.session['username'] = username
+                request.session['security_picture'] = security_officer.picture.url if security_officer.picture else None
+                return redirect('security-dashboard')
+        except Security.DoesNotExist:
+            pass
+
+        # Check for Built-in User (Head)
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            # Assume the built-in user is the head
+            request.session['user_type'] = 'head'
+            messages.success(request, 'Login successful!')
+            return redirect('head-dashboard')
+
+        # If none of the conditions match, return an error message
+        messages.error(request, 'Invalid username or password.')
+
+    return render(request, 'qrapp/u_login.html')
 
 
+def all_vehicles(request):
+    vehicles = Vehicle.objects.all()
+    return render(request, 'qrapp/all_vehicles.html', {'vehicles': vehicles})
 
 def approve_student(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -133,8 +184,9 @@ def login_stud(request):
             if student.check_password(password):  # Use the method here
                 # Log the student in
                 request.session['user_type'] = 'student'
-                request.session['username'] = student.username
                 request.session['student_id'] = student.student_id
+                request.session['first_name'] = student.first_name  # Store first name
+                request.session['last_name'] = student.last_name 
                 
                
                 return redirect('stud-dashboard')
@@ -149,9 +201,6 @@ def login_stud(request):
 
 def student_dashboard(request):
     return render(request, 'qrapp/stud-dashboard.html')
-
-
-
 
 def register_stud(request):
     if request.method == 'POST':
@@ -214,21 +263,21 @@ def pending_registration(request):
 
 def custom_logout_view(request):
     logout(request)
-    return redirect('head-login')  # Redirect to your desired page
+    return redirect('unified-login')  # Redirect to your desired page
 
 
 def student_logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
-    return redirect('stud-log')
+    return redirect('unified-login')
 
 def security_logout_view(request):
     logout(request)
-    return redirect('security-login')  # Redirect to your desired page
+    return redirect('unified-login')  # Redirect to your desired page
 
-def student_logout_view(request):
-    logout(request) 
-    return redirect('stud-log')  # Redirect to your desired page
+# def student_logout_view(request):
+#     logout(request) 
+#     return redirect('stud-log')  # Redirect to your desired page
 
 
 def student_details_pending(request, student_id):
@@ -318,7 +367,7 @@ def student_details(request):
     except StudentMasterList.DoesNotExist:
         return JsonResponse({'error': 'Student not found'}, status=404)
     
-from django.contrib.auth.hashers import check_password
+
 
 def security_login(request):
     if request.method == 'POST':
@@ -337,6 +386,7 @@ def security_login(request):
                     # Save the user type in session and redirect to dashboard
                     request.session['user_type'] = 'security'
                     request.session['username'] = username
+                    request.session['security_picture'] = security_officer.picture.url if security_officer.picture else None
                     
                     return redirect('security-dashboard')
                 else:
@@ -386,12 +436,14 @@ def scan_qr_code(request):
                 # Check if the QR code data is numeric (student ID)
                 if qr_code_data.isnumeric():
                     student = StudentMasterList.objects.get(student_id=qr_code_data)
+                    offense_count = Violation.objects.filter(student_id=qr_code_data).count()
                     return JsonResponse({
                         'qr_code_data': qr_code_data,
                         'student_name': student.username,
                         'student_id': student.student_id,
                         'first_name': student.first_name,
                         'last_name': student.last_name,
+                        'offense_count': offense_count
                     })
                 else:
                     return JsonResponse({'error': 'Invalid QR code data'})
@@ -425,7 +477,9 @@ def scan_student_qr_code(request):
 
         # Detect and decode QR code
         qr_detector = cv2.QRCodeDetector()
+        # Simplified image processing
         qr_code_data, points, _ = qr_detector.detectAndDecode(resized_img)
+
 
         if qr_code_data:
             try:
@@ -466,6 +520,7 @@ def scan_student_qr_code(request):
                                 'username': student.username,
                                 'course': student.course,
                                 'log_type': log_type,
+                                'log_time': log_entry.log_time.strftime('%Y-%m-%d %H:%M:%S'),
                             },
                         })
                     else:
@@ -479,8 +534,30 @@ def scan_student_qr_code(request):
         return JsonResponse({'success': False, 'message': 'QR code not detected'})
     
 def student_logs(request):
-    logs = Logs.objects.all()  # Retrieve all log entries
-    return render(request, 'qrapp/logs.html', {'logs': logs})
+    logs = Logs.objects.all()
+
+    # Handle timeframe filter
+    timeframe = request.GET.get('timeframe', '')
+    if timeframe:
+        if timeframe == 'today':
+            today = timezone.now().date()
+            logs = logs.filter(log_time__date=today)
+        elif timeframe == 'last_7_days':
+            last_7_days = timezone.now() - timedelta(days=7)
+            logs = logs.filter(log_time__gte=last_7_days)
+        elif timeframe == 'last_30_days':
+            last_30_days = timezone.now() - timedelta(days=30)
+            logs = logs.filter(log_time__gte=last_30_days)
+
+    # Handle start and end date filters
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+    if start_date:
+        logs = logs.filter(log_time__gte=start_date)
+    if end_date:
+        logs = logs.filter(log_time__lte=end_date)
+
+    return render(request, 'qrapp/logs.html', {'logs': logs, 'start_date': start_date, 'end_date': end_date})
 
     
 def submit_violation(request):
@@ -492,16 +569,24 @@ def submit_violation(request):
         vehicle_type = request.POST.get('vehicle_type')
         violations = request.POST.get('violations')
 
-        # Create a new violation record
+        # Check if the student already has violation records
+        existing_violations = Violation.objects.filter(student_id=student_id)
+        offense_count = existing_violations.count() + 1  # Set offense count based on existing violations
+
+        # Create a new violation record with date_created and offense_count
         violation = Violation.objects.create(
             username=username,
             first_name=first_name,
             last_name=last_name,
             student_id=student_id,
             vehicle_type=vehicle_type,
-            violations=violations
+            violations=violations,
+            date_created=timezone.now(),
+            offense_count=offense_count
         )
+        
         return JsonResponse({'success': True})
+    
     return JsonResponse({'success': False})
 
 
@@ -523,3 +608,36 @@ def reject_student(request, student_id):
     
     # Redirect to the pending registrations page or another page as needed
     return redirect('pending_registrations')  # Make sure to replace 'pending_registrations' with your actual URL name
+
+
+def my_vehicle(request):
+    if 'student_id' not in request.session:
+        messages.error(request, "You must be logged in to view your vehicles.")
+        return redirect('login_stud')
+    
+    student_id = request.session['student_id']
+    vehicles = Vehicle.objects.filter(student_id__student_id=student_id)  # Filter by logged-in student's ID
+
+    return render(request, 'qrapp/my-vehicle.html', {'vehicles': vehicles})
+
+def add_vehicle(request):
+    form = VehicleForm(request.POST, request.FILES)
+
+    if request.method == "POST":
+        if form.is_valid():
+            vehicle = form.save(commit=False)
+
+            try:
+                # Get student by student_id from session
+                student = StudentMasterList.objects.get(student_id=request.session['student_id'])
+                vehicle.student_id = student  # Assign student instance
+                
+                vehicle.save()
+                messages.success(request, "Vehicle added successfully.")
+                return redirect('my-vehicle')
+            except StudentMasterList.DoesNotExist:
+                messages.error(request, "Student not found. Please log in again.")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    
+    return render(request, 'qrapp/add_vehicle.html', {'form': form})

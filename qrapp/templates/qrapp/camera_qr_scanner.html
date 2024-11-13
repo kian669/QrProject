@@ -50,9 +50,11 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="studentInfoModalLabel">Violations</h5>
+                    
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <h6 id="offenseCount" class="text-danger" style="font-weight: bold;"></h6>
                     <form id="violationForm" method="POST">
                         {% csrf_token %}
                         <div class="mb-3">
@@ -269,7 +271,7 @@
                                 document.getElementById('studentID').value = data.student_id;
                                 document.getElementById('firstName').value = data.first_name || ''; // Assuming data.first_name exists
                                 document.getElementById('lastName').value = data.last_name || ''; // Assuming data.last_name exists
-    
+                                document.getElementById('offenseCount').textContent = "Offense Count: " + (data.offense_count || 0);
         
                                 // Check if modal is already active, hide if so
                                 const studentInfoModal = bootstrap.Modal.getInstance(document.getElementById('studentInfoModal'));

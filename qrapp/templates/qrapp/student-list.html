@@ -48,8 +48,7 @@
         </tbody>
     </table>
 </div>
-
-<!-- Modal for Viewing Student Details -->
+<!-- Main Modal for Viewing Student Details -->
 <div class="modal fade" id="viewStudentModal" tabindex="-1" aria-labelledby="viewStudentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -58,18 +57,73 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p><strong>Student ID:</strong> <span id="modalStudentId"></span></p>
-                <p><strong>Username:</strong> <span id="modalUsername"></span></p>
-                <p><strong>Email:</strong> <span id="modalEmail"></span></p>
-                <p><strong>First Name:</strong> <span id="modalFirstName"></span></p>
-                <p><strong>Last Name:</strong> <span id="modalLastName"></span></p>
-                <p><strong>Course:</strong> <span id="modalCourse"></span></p>
-                <p><strong>Year:</strong> <span id="modalYear"></span></p>
-                <p><strong>Major:</strong> <span id="modalMajor"></span></p>
-                <p><strong>OR Upload:</strong> <a id="modalOrUpload" href="#" target="_blank">View</a></p>
-                <p><strong>CR Upload:</strong> <a id="modalCrUpload" href="#" target="_blank">View</a></p>
-                <p><strong>License Upload:</strong> <a id="modalLicenseUpload" href="#" target="_blank">View</a></p>
-                <p><strong>QR Code:</strong> <img id="modalQrCode" src="" alt="QR Code" class="img-fluid" style="max-width: 150px;"></p>
+                <!-- Styling the table to be more interactive -->
+                <table class="table table-striped table-bordered table-hover table-sm">
+                    <tbody>
+                        <tr>
+                            <th>Student ID</th>
+                            <td id="modalStudentId"></td>
+                        </tr>
+                        <tr>
+                            <th>Username</th>
+                            <td id="modalUsername"></td>
+                        </tr>
+                        <tr>
+                            <th>Email</th>
+                            <td id="modalEmail"></td>
+                        </tr>
+                        <tr>
+                            <th>First Name</th>
+                            <td id="modalFirstName"></td>
+                        </tr>
+                        <tr>
+                            <th>Last Name</th>
+                            <td id="modalLastName"></td>
+                        </tr>
+                        <tr>
+                            <th>Course</th>
+                            <td id="modalCourse"></td>
+                        </tr>
+                        <tr>
+                            <th>Year</th>
+                            <td id="modalYear"></td>
+                        </tr>
+                        <tr>
+                            <th>Major</th>
+                            <td id="modalMajor"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Interactive Image Previews -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>OR Upload:</strong> 
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#uploadPreviewModal">
+                                <img id="modalOrUpload" src="" alt="OR Upload" class="img-fluid" style="max-width: 150px; cursor: pointer;">
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>CR Upload:</strong>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#uploadPreviewModal">
+                                <img id="modalCrUpload" src="" alt="CR Upload" class="img-fluid" style="max-width: 150px; cursor: pointer;">
+                            </a>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>License Upload:</strong>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#uploadPreviewModal">
+                                <img id="modalLicenseUpload" src="" alt="License Upload" class="img-fluid" style="max-width: 150px; cursor: pointer;">
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- QR Code Preview -->
+                <p><strong>QR Code:</strong> 
+                    <img id="modalQrCode" src="" alt="QR Code" class="img-fluid" style="max-width: 150px;">
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -78,6 +132,24 @@
     </div>
 </div>
 
+
+<!-- Sub-Modal for Upload Preview -->
+<div class="modal fade" id="uploadPreviewModal" tabindex="-1" aria-labelledby="uploadPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadPreviewModalLabel">Document Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="uploadPreviewImage" src="" alt="Document Preview" class="img-fluid" style="max-width: 100%;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="updateStudentModal" tabindex="-1" aria-labelledby="updateStudentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -162,10 +234,14 @@
                     $('#modalCourse').text(data.course);
                     $('#modalYear').text(data.year);
                     $('#modalMajor').text(data.major);
-                    $('#modalOrUpload').attr('href', data.or_upload);
-                    $('#modalCrUpload').attr('href', data.cr_upload);
-                    $('#modalLicenseUpload').attr('href', data.license_upload);
-                    $('#modalQrCode').attr('src', data.qr_code);  // Display QR code if available
+        
+                    // Directly set image sources for OR, CR, and License Uploads
+                    $('#modalOrUpload').attr('src', data.or_upload);
+                    $('#modalCrUpload').attr('src', data.cr_upload);
+                    $('#modalLicenseUpload').attr('src', data.license_upload);
+                    
+                    // Display QR Code if available
+                    $('#modalQrCode').attr('src', data.qr_code); 
                 },
                 error: function() {
                     alert('Failed to fetch student details.');
@@ -220,6 +296,22 @@
             }
         });
     });
+      // Handle the Upload Preview Modal
+      $('#modalOrUpload, #modalCrUpload, #modalLicenseUpload').click(function() {
+        var imageSrc = $(this).attr('src');
+        $('#uploadPreviewImage').attr('src', imageSrc);
+    });
 
+      
+    // Prevent closing the main modal when opening the sub-modal
+    $('#uploadPreviewModal').on('show.bs.modal', function (e) {
+        // Prevent the main modal from closing
+        $('#viewStudentModal').modal('hide');
+    });
+
+    // When sub-modal is closed, reopen the main modal
+    $('#uploadPreviewModal').on('hidden.bs.modal', function (e) {
+        $('#viewStudentModal').modal('show');
+    });
 </script>
 {% endblock %}

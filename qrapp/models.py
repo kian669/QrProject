@@ -98,6 +98,8 @@ class Violation(models.Model):
     student_id = models.CharField(max_length=20)
     vehicle_type = models.CharField(max_length=50)
     violations = models.CharField(max_length=255)
+    date_created = models.DateTimeField(default=timezone.now)  # Field for the date of the violation
+    offense_count = models.PositiveIntegerField(blank=True, null=True)  # Field for number of offenses
 
     def __str__(self):
         return f"{self.username} - {self.violations} ({self.vehicle_type})"
@@ -118,3 +120,19 @@ class Logs(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.log_type} at {self.log_time.strftime('%Y-%m-%d %H:%M:%S')}"
+    
+    
+class Vehicle(models.Model):
+    plate_number = models.CharField(max_length=20, unique=True)
+    or_upload = models.FileField(upload_to='uploads/or/')
+    cr_upload = models.FileField(upload_to='uploads/cr/')
+    license_upload = models.FileField(upload_to='uploads/license/')
+    vehicle_type = models.CharField(max_length=50, choices=[('Car', 'Car'), ('Motorcycle', 'Motorcycle')])
+    student_id = models.ForeignKey('StudentMasterList', on_delete=models.CASCADE, related_name='vehicles')
+    id = models.AutoField(primary_key=True)
+
+    def __str__(self):
+        return f"{self.plate_number} ({self.vehicle_type}) - {self.student_id.username}"
+    
+    
+    

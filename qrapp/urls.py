@@ -9,16 +9,14 @@ from .views import student_logout_view
 from .views import submit_violation
 from .views import reject_student
 from . import views 
-from .views import approve_student, activate_student
+from .views import approve_student, activate_student, unified_login
 
 
 
 
 urlpatterns = [
    
-    path('',views.home, name=""), 
-   
-  
+    path('',views.home, name=""),
     path('stud-log', views.login_stud, name='stud-log'),
     path('stud-dashboard', views.student_dashboard, name='stud-dashboard'),
     path('stud-reg', views.register_stud, name='stud-reg'),
@@ -45,7 +43,10 @@ urlpatterns = [
     path('activate/<str:token>/', activate_student, name='activate_student'),
     path('scan-student-qr/', views.scan_student_qr_code, name='scan_student_qr_code'),
     path('logs/', views.student_logs, name='logs'),
-    
+    path('my-vehicle/', views.my_vehicle, name='my-vehicle'),
+    path('add-vehicle/', views.add_vehicle, name='add-vehicle'),
+    path('all-vehicles/', views.all_vehicles, name='all-vehicles'),
+    path('unified-login/', unified_login, name='unified-login'),
 ]
 
 if settings.DEBUG:

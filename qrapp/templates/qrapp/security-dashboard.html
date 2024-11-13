@@ -6,42 +6,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Officer Dashboard</title>
     <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
         .dashboard-header {
-            background-color: #343a40;
+            background: linear-gradient(45deg, #4e54c8, #8f94fb);
             color: white;
             padding: 20px;
-            border-bottom: 1px solid #495057;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
         .dashboard-card {
             border: none;
             border-radius: 10px;
-            background-color: #343a40;
+            background: linear-gradient(45deg, #ff6b6b, #f06595);
             color: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        .dashboard-card:hover {
+            transform: scale(1.05);
         }
         .dashboard-card-body {
             padding: 20px;
+            font-weight: bold;
         }
         .card-header {
-            background-color: #495057;
-            border-bottom: 1px solid #6c757d;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
         .card-body {
+            padding: 20px;
+            text-align: center;
+        }
+        .table {
             background-color: #343a40;
+            color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
         }
         .table th, .table td {
-            color: #ffffff;
+            color: #f8f9fa;
+            border-color: #495057;
         }
         .table thead th {
-            background-color: #495057;
+            background-color: #6c757d;
+            text-transform: uppercase;
+            font-size: 14px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <header class="dashboard-header d-flex justify-content-between align-items-center">
+    <header class="dashboard-header">
         <h1 class="h3">Security Officer Dashboard</h1>
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-light dropdown-toggle" type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
                 User Menu
             </button>
             <ul class="dropdown-menu" aria-labelledby="userMenu">
@@ -56,7 +81,7 @@
         <div class="row">
             <!-- Overview Card -->
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card dashboard-card">
+                <div class="card dashboard-card" style="background: linear-gradient(45deg, #4e54c8, #8f94fb);">
                     <div class="card-header">
                         <h5 class="card-title">Total Incidents</h5>
                     </div>
@@ -68,7 +93,7 @@
             </div>
             <!-- Active Alerts Card -->
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card dashboard-card">
+                <div class="card dashboard-card" style="background: linear-gradient(45deg, #ff6b6b, #f06595);">
                     <div class="card-header">
                         <h5 class="card-title">Active Alerts</h5>
                     </div>
@@ -80,7 +105,7 @@
             </div>
             <!-- Scheduled Patrols Card -->
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card dashboard-card">
+                <div class="card dashboard-card" style="background: linear-gradient(45deg, #42e695, #3bb2b8);">
                     <div class="card-header">
                         <h5 class="card-title">Scheduled Patrols</h5>
                     </div>
@@ -92,7 +117,7 @@
             </div>
             <!-- Completed Tasks Card -->
             <div class="col-md-6 col-lg-3 mb-4">
-                <div class="card dashboard-card">
+                <div class="card dashboard-card" style="background: linear-gradient(45deg, #f093fb, #f5576c);">
                     <div class="card-header">
                         <h5 class="card-title">Completed Tasks</h5>
                     </div>
@@ -106,7 +131,7 @@
 
         <!-- Incident Reports Table -->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="background-color: #6c757d; color: #fff;">
                 <h5 class="card-title">Recent Incident Reports</h5>
             </div>
             <div class="card-body">

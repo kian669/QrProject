@@ -20,6 +20,7 @@
                         <th>Student ID</th>
                         <th>Vehicle Type</th>
                         <th>Violations</th>
+                        <th>Date Created</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -29,6 +30,7 @@
                         <td>{{ violation.student_id }}</td>
                         <td>{{ violation.vehicle_type }}</td>
                         <td>{{ violation.violations }}</td>
+                        <td>{{ violation.date_created|date:"F j, Y, g:i a" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
