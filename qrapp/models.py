@@ -36,9 +36,9 @@ class Student(models.Model):
     course = models.CharField(max_length=100)
     year = models.CharField(max_length=10)
     major = models.CharField(max_length=100)
-    or_upload = models.FileField(upload_to='uploads/or/')
-    cr_upload = models.FileField(upload_to='uploads/cr/')
-    license_upload = models.FileField(upload_to='uploads/license/')
+    # or_upload = models.FileField(upload_to='uploads/or/')
+    # cr_upload = models.FileField(upload_to='uploads/cr/')
+    # license_upload = models.FileField(upload_to='uploads/license/')
     password = models.CharField(max_length=128, blank=True, null=False)
 
 
@@ -54,9 +54,9 @@ class StudentMasterList(models.Model):
         course = models.CharField(max_length=100)
         year = models.CharField(max_length=10)
         major = models.CharField(max_length=100)
-        or_upload = models.FileField(upload_to='uploads/or/')
-        cr_upload = models.FileField(upload_to='uploads/cr/')
-        license_upload = models.FileField(upload_to='uploads/license/')
+        # or_upload = models.FileField(upload_to='uploads/or/')
+        # cr_upload = models.FileField(upload_to='uploads/cr/')
+        # license_upload = models.FileField(upload_to='uploads/license/')
         password = models.CharField(max_length=128, blank=True, null=False)
         qr_code = models.ImageField(upload_to='uploads/qr_codes/', blank=True, null=True)
 

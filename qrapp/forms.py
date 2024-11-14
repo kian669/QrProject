@@ -85,14 +85,14 @@ class StudentRegistrationForm(forms.ModelForm):
         model = Student
         fields = [
             'student_id', 'username', 'email', 'first_name', 'last_name', 
-            'course', 'year', 'major', 'or_upload', 'cr_upload', 'license_upload', 'password'
+            'course', 'year', 'major', 'password'
         ]
-        widgets = {
-            'or_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
-            'cr_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
-            'license_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
-            'password': PasswordInput(),
-        }
+        # widgets = {
+        #     'or_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
+        #     'cr_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
+        #     'license_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
+        #     'password': PasswordInput(),
+        # }
         
 
         

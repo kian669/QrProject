@@ -615,15 +615,15 @@
                     <a href="{% url 'unified-login' %}" class="nav-link" id="about-link">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link" id="auth-dropdown">Auth
+                    <a href="#" class="nav-link" id="auth-dropdown">Register
                         <ion-icon name="chevron-down-outline"></ion-icon>
                     </a>
                     <ul class="dropdown">
-                        <li><a href="{% url 'security-login' %}" class="dropdown-link">Security Officer</a></li>
-                        <li><a href="#" class="dropdown-link">Employees Login</a></li>
-                        <li><a href="{% url 'stud-log'%}" class="dropdown-link">Students Login</a></li>
-                        <li><a href="{% url 'head-login'%}" class="dropdown-link">Head of Security</a></li>
-                        <li><a href="{% url 'unified-login'%}" class="dropdown-link">Unified Login</a></li>
+                        <li><a href="{% url 'stud-reg' %}" class="dropdown-link">Student Registration</a></li>
+                        <li><a href="#" class="dropdown-link">Employee Registration</a></li>    
+                        <li><a href="#" class="dropdown-link">Security Registration</a></li>
+                        {% comment %} <li><a href="{% url 'head-login'%}" class="dropdown-link">Head of Security</a></li>
+                        <li><a href="{% url 'unified-login'%}" class="dropdown-link">Unified Login</a></li> {% endcomment %}
                        
                     </ul>
                 </li>

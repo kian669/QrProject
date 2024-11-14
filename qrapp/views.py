@@ -132,9 +132,9 @@ def activate_student(request, token):
         course=student.course,
         year=student.year,
         major=student.major,
-        or_upload=student.or_upload,
-        cr_upload=student.cr_upload,
-        license_upload=student.license_upload,
+        # or_upload=student.or_upload,
+        # cr_upload=student.cr_upload,
+        # license_upload=student.license_upload,
         password=student.password,
     )
     student_master.set_password(student.password)  # Hash the password
@@ -210,7 +210,7 @@ def register_stud(request):
        
             student.save()
             messages.success(request, 'Registration successful!')
-            return redirect('stud-log')
+            return redirect('unified-login')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -268,7 +268,7 @@ def custom_logout_view(request):
 
 def student_logout_view(request):
     logout(request)
-    messages.success(request, "You have been logged out successfully.")
+   
     return redirect('unified-login')
 
 def security_logout_view(request):
@@ -291,9 +291,9 @@ def student_details_pending(request, student_id):
             'course': student.course,
             'year': student.year,
             'major': student.major,
-            'or_upload': student.or_upload.url,
-            'cr_upload': student.cr_upload.url,
-            'license_upload': student.license_upload.url,
+            # 'or_upload': student.or_upload.url,
+            # 'cr_upload': student.cr_upload.url,
+            # 'license_upload': student.license_upload.url,
         }
         return JsonResponse(data)
     except Student.DoesNotExist:
@@ -358,9 +358,9 @@ def student_details(request):
             'course': student.course,
             'year': student.year,
             'major': student.major,
-            'or_upload': student.or_upload.url,
-            'cr_upload': student.cr_upload.url,
-            'license_upload': student.license_upload.url,
+            # 'or_upload': student.or_upload.url,
+            # 'cr_upload': student.cr_upload.url,
+            # 'license_upload': student.license_upload.url,
             'qr_code': student.qr_code.url if student.qr_code else '',
         }
         return JsonResponse(data)
@@ -437,16 +437,35 @@ def scan_qr_code(request):
                 if qr_code_data.isnumeric():
                     student = StudentMasterList.objects.get(student_id=qr_code_data)
                     offense_count = Violation.objects.filter(student_id=qr_code_data).count()
-                    return JsonResponse({
+                    
+                    
+                    vehicles = Vehicle.objects.filter(student_id=student)
+
+                    # Prepare the response data
+                    response_data = {
                         'qr_code_data': qr_code_data,
                         'student_name': student.username,
                         'student_id': student.student_id,
                         'first_name': student.first_name,
                         'last_name': student.last_name,
                         'offense_count': offense_count
-                    })
+                    }
+
+                    # Add vehicle info to the response data
+                    vehicle_options = []
+                    for vehicle in vehicles:
+                        vehicle_options.append({
+                            'vehicle_type': vehicle.vehicle_type,
+                            'plate_number': vehicle.plate_number
+                        })
+
+                    response_data['vehicles'] = vehicle_options
+
+                    return JsonResponse(response_data)
+
                 else:
                     return JsonResponse({'error': 'Invalid QR code data'})
+                
             
             except StudentMasterList.DoesNotExist:
                 return JsonResponse({'error': 'Student not found'})

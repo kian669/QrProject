@@ -24,7 +24,7 @@
                         <td><a href="#" class="view-image" data-image-url="{{ vehicle.cr_upload.url }}">View</a></td>
                         <td><a href="#" class="view-image" data-image-url="{{ vehicle.license_upload.url }}">View</a></td>
                         <td>{{ vehicle.vehicle_type }}</td>
-                        <td>{{ vehicle.student_id.student_id}}</td>
+                        <td>{{ vehicle.student_id.student_id }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -48,18 +48,18 @@
 
     <!-- Include jQuery, DataTables, and Bootstrap JS & CSS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Initialize the DataTable and Modal Script -->
     <script>
         $(document).ready(function() {
             $('#vehiclesTable').DataTable();
 
-            // Handle click event on 'View' links
-            $('.view-image').on('click', function(e) {
+            // Event delegation for dynamically handled elements
+            $('#vehiclesTable').on('click', '.view-image', function(e) {
                 e.preventDefault();  // Prevent default anchor behavior
                 var imageUrl = $(this).data('image-url');  // Get the image URL from data attribute
                 $('#modalImage').attr('src', imageUrl);  // Set image URL in modal
