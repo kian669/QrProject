@@ -1,0 +1,52 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Employee Vehicle</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Add Employee Vehicle</h2>
+        <form method="post" enctype="multipart/form-data" action="{% url 'add-vehicle-employee' %}">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="plate_number" class="form-label">Plate Number</label>
+                <input type="text" class="form-control" id="plate_number" name="plate_number" maxlength="20" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="or_upload" class="form-label">OR Upload</label>
+                <input type="file" class="form-control" id="or_upload" name="or_upload" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="cr_upload" class="form-label">CR Upload</label>
+                <input type="file" class="form-control" id="cr_upload" name="cr_upload" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="license_upload" class="form-label">License Upload</label>
+                <input type="file" class="form-control" id="license_upload" name="license_upload" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="vehicle_type" class="form-label">Vehicle Type</label>
+                <select class="form-select" id="vehicle_type" name="vehicle_type" required>
+                    <option value="" disabled selected>Select vehicle type</option>
+                    <option value="Car">Car</option>
+                    <option value="Motorcycle">Motorcycle</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Add Vehicle</button>
+        </form>
+    </div>
+</body>
+</html>
+{% endblock %}

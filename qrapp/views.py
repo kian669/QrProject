@@ -37,6 +37,99 @@ from django.db.models import Count
 from .forms import VehicleForm
 from datetime import timedelta
 from django.contrib.auth.models import User
+from .models import Employee,EmployeeVehicle
+
+def employee_list(request):
+    employees = Employee.objects.all()
+    return render(request, 'qrapp/employee-list.html', {'employees': employees})
+
+def all_employee_vehicle(request):
+    vehicles = EmployeeVehicle.objects.select_related('employee_id').all()
+    return render(request, 'qrapp/all_employee_vehicles.html', {'vehicles': vehicles})
+
+def my_vehicle_employee(request):
+    # Get the logged-in employee using the session
+    employee_id = request.session.get('employee_id')
+    
+    # Retrieve the employee's vehicles
+    vehicles = EmployeeVehicle.objects.filter(employee_id=employee_id)
+    
+    # Pass the vehicle details to the template
+    return render(request, 'qrapp/my_vehicle_employee.html', {'vehicles': vehicles})
+
+def add_employee_vehicle(request):
+    if request.method == 'POST':
+        plate_number = request.POST['plate_number']
+        or_upload = request.FILES['or_upload']
+        cr_upload = request.FILES['cr_upload']
+        license_upload = request.FILES['license_upload']
+        vehicle_type = request.POST['vehicle_type']
+        
+        # Get the employee_id from the session
+        employee_id = request.session.get('employee_id')
+        
+        if not employee_id:
+            # Handle the case when employee_id is not found in session
+            return redirect('unified-login')  # Redirect to login or appropriate page
+        
+        # Fetch the employee object using the session's employee_id
+        employee = Employee.objects.get(id=employee_id)
+        
+        # Create the EmployeeVehicle instance
+        EmployeeVehicle.objects.create(
+            plate_number=plate_number,
+            or_upload=or_upload,
+            cr_upload=cr_upload,
+            license_upload=license_upload,
+            vehicle_type=vehicle_type,
+            employee_id=employee  # Use the employee object to associate with the vehicle
+        )
+        
+        return redirect('my-vehicle-employee')  # Redirect to a success page or another view
+    
+    # If the request is GET, render the form
+    return render(request, 'qrapp/add_vehicle_employee.html')
+
+
+def employee_dashboard(request):
+    return render(request, 'qrapp/employee-dashboard.html')
+
+def employee_form(request):
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name')
+        contact_number = request.POST.get('contact_number')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        status = request.POST.get('status')
+
+        # Hash the password
+        hashed_password = make_password(password)
+
+        # Create the Employee object (initial save)
+        employee = Employee.objects.create(
+            full_name=full_name,
+            contact_number=contact_number,
+            username=username,
+            password=hashed_password,
+            status=status
+        )
+
+        # Generate QR Code
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(str(employee.id))  # Just the ID without "Employee ID: "
+        qr.make(fit=True)
+
+        # Save QR Code to ImageField
+        img = qr.make_image(fill='black', back_color='white')
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        file_name = f'employee_{employee.id}_qr.png'
+        employee.qr_code.save(file_name, ContentFile(buffer.getvalue()))
+        buffer.close()
+
+        return redirect('unified-login')  # Replace with your desired redirect URL name or view
+
+    return render(request, 'qrapp/employee-register.html')
 
 def unified_login(request):
     if request.method == 'POST':
@@ -67,7 +160,18 @@ def unified_login(request):
                 return redirect('security-dashboard')
         except Security.DoesNotExist:
             pass
-
+         # Check for Employee
+        try:
+            employee = Employee.objects.get(username=username)
+            if check_password(password, employee.password):  # Use check_password for comparison
+                request.session['user_type'] = 'employee'
+                request.session['employee_id'] = employee.id
+                request.session['full_name'] = employee.full_name
+                return redirect('employee-dashboard')
+        except Employee.DoesNotExist:
+            pass
+        
+        
         # Check for Built-in User (Head)
         user = authenticate(request, username=username, password=password)
         if user is not None:
@@ -433,45 +537,62 @@ def scan_qr_code(request):
 
         if qr_code_data:
             try:
-                # Check if the QR code data is numeric (student ID)
+                # Check if the QR code data is numeric (student ID or employee ID)
                 if qr_code_data.isnumeric():
-                    student = StudentMasterList.objects.get(student_id=qr_code_data)
-                    offense_count = Violation.objects.filter(student_id=qr_code_data).count()
-                    
-                    
-                    vehicles = Vehicle.objects.filter(student_id=student)
+                    # Try fetching student first
+                    print(f"QR Code Data: {qr_code_data}") 
+                    try:
+                        student = StudentMasterList.objects.get(student_id=qr_code_data)
+                        offense_count = Violation.objects.filter(student_id=qr_code_data).count()
+                        print(student.username)
+                        vehicles = Vehicle.objects.filter(student_id=student)
 
-                    # Prepare the response data
-                    response_data = {
-                        'qr_code_data': qr_code_data,
-                        'student_name': student.username,
-                        'student_id': student.student_id,
-                        'first_name': student.first_name,
-                        'last_name': student.last_name,
-                        'offense_count': offense_count
-                    }
+                        response_data = {
+                            'qr_code_data': qr_code_data,
+                            'student_name': student.username,
+                            'student_id': student.student_id,
+                            'first_name': student.first_name,
+                            'last_name': student.last_name,
+                            'offense_count': offense_count
+                        }
 
-                    # Add vehicle info to the response data
-                    vehicle_options = []
-                    for vehicle in vehicles:
-                        vehicle_options.append({
-                            'vehicle_type': vehicle.vehicle_type,
-                            'plate_number': vehicle.plate_number
-                        })
+                        vehicle_options = []
+                        for vehicle in vehicles:
+                            vehicle_options.append({
+                                'vehicle_type': vehicle.vehicle_type,
+                                'plate_number': vehicle.plate_number
+                            })
 
-                    response_data['vehicles'] = vehicle_options
+                        response_data['vehicles'] = vehicle_options
+                        return JsonResponse(response_data)
 
-                    return JsonResponse(response_data)
+                    except StudentMasterList.DoesNotExist:
+                        pass  # If no student found, proceed to employee check
+
+                    # Now check for employee
+                    try:
+                        employee = Employee.objects.get(id=int(qr_code_data))  
+                        print(f"Employee Data: {employee.full_name}, ID: {employee.id}, Contact: {employee.contact_number}, Status: {employee.status}")
+                        response_data = {
+                            'qr_code_data': qr_code_data,
+                            'employee_name': employee.full_name,
+                            'employee_id': employee.id, 
+                            'contact_number': employee.contact_number,
+                            'status': employee.status
+                        }
+
+                        return JsonResponse(response_data)
+
+                    except Employee.DoesNotExist:
+                        return JsonResponse({'error': 'Employee not found'})
 
                 else:
                     return JsonResponse({'error': 'Invalid QR code data'})
-                
-            
-            except StudentMasterList.DoesNotExist:
-                return JsonResponse({'error': 'Student not found'})
+
+            except Exception as e:
+                return JsonResponse({'error': str(e)})
 
         return JsonResponse({'error': 'QR code not detected'})
-
 
 def attendance_scanner(request):
     return render(request, 'qrapp/attendance-scanner.html')

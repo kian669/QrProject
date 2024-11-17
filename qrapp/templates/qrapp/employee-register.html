@@ -1,0 +1,36 @@
+{% extends 'qrapp/base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Employee Registration</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required maxlength="255">
+        </div>
+        <div class="mb-3">
+            <label for="contact_number" class="form-label">Contact Number</label>
+            <input type="text" class="form-control" id="contact_number" name="contact_number" required maxlength="15">
+        </div>
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required maxlength="150">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+                <option value="" disabled selected>Select Status</option>
+                <option value="regular">Regular</option>
+                <option value="contract">Contract of Service</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+</div>
+
+{% endblock %}

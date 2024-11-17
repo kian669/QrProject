@@ -36,7 +36,7 @@ urlpatterns = [
     path('security-dashboard', views.security_dashboard, name='security-dashboard'),  # AJAX endpoint
     path('qr_code_scanner/', views.qr_code_scanner_view, name='qr_code_scanner'),
     path('scan_qr_code/', views.scan_qr_code, name='scan_qr_code'),
-    path('submit_violation/', submit_violation, name='submit_violation'),
+    path('submit_violation/', submit_violation, name='submit_violation'),   
     path('violation_list/', views.violation_list, name='violation_list'),
     path('student/update/', views.update_student, name='update_student'),
     path('approve/<int:student_id>/', approve_student, name='approve_student'),
@@ -47,6 +47,12 @@ urlpatterns = [
     path('add-vehicle/', views.add_vehicle, name='add-vehicle'),
     path('all-vehicles/', views.all_vehicles, name='all-vehicles'),
     path('unified-login/', unified_login, name='unified-login'),
+    path('employee-reg/', views.employee_form, name='employee-reg'),
+    path('employee-dashboard/', views.employee_dashboard, name='employee-dashboard'),
+    path('add-vehicle-employee/', views.add_employee_vehicle, name='add-vehicle-employee'),
+    path('my-vehicle-employee/', views.my_vehicle_employee, name='my-vehicle-employee'),
+    path('all-employee-vehicle/', views.all_employee_vehicle, name='all-employee-vehicle'),
+    path('employee-list/', views.employee_list, name='employee-list'),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,59 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Vehicles</title>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Vehicles</h1>
+        <table id="employee-vehicles" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Plate Number</th>
+                    <th>Vehicle Type</th>
+                    <th>Employee</th>
+                    <th>OR</th>
+                    <th>CR</th>
+                    <th>License</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                <tr>
+                    <td>{{ vehicle.plate_number }}</td>
+                    <td>{{ vehicle.vehicle_type }}</td>
+                    <td>{{ vehicle.employee_id.username }}</td>
+                    <td><a href="{{ vehicle.or_upload.url }}" target="_blank">View OR</a></td>
+                    <td><a href="{{ vehicle.cr_upload.url }}" target="_blank">View CR</a></td>
+                    <td><a href="{{ vehicle.license_upload.url }}" target="_blank">View License</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#employee-vehicles').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+            });
+        });
+    </script>
+</body>
+</html>
+
+{% endblock %}

@@ -6,7 +6,7 @@ from django.utils import timezone
 
 class User(AbstractUser):
     # Additional fields for your custom user model
-    user_type = models.CharField(max_length=20, choices=[('security', 'Security'), ('student', 'Student'), ('head', 'Head of Security')])
+    user_type = models.CharField(max_length=20, choices=[('security', 'Security'), ('student', 'Student'), ('head', 'Head of Security'),('employee', 'Employee') ])
 
     # Add related_name to avoid conflict with Django's default User model
     groups = models.ManyToManyField(
@@ -134,5 +134,34 @@ class Vehicle(models.Model):
     def __str__(self):
         return f"{self.plate_number} ({self.vehicle_type}) - {self.student_id.username}"
     
-    
-    
+
+class EmployeeVehicle(models.Model):
+    plate_number = models.CharField(max_length=20, unique=True)
+    or_upload = models.FileField(upload_to='uploads/or/')
+    cr_upload = models.FileField(upload_to='uploads/cr/')  
+    license_upload = models.FileField(upload_to='uploads/license/')
+    vehicle_type = models.CharField(max_length=50, choices=[('Car', 'Car'), ('Motorcycle', 'Motorcycle')])
+    employee_id = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='vehicles')
+    id = models.AutoField(primary_key=True)
+
+    def __str__(self):
+        return f"{self.plate_number} ({self.vehicle_type}) - {self.employee_id.username}"
+
+
+
+class Employee(models.Model):
+    STATUS_CHOICES = [
+        ('regular', 'Regular'),
+        ('contract', 'Contract of Service'),
+    ]
+
+    id = models.AutoField(primary_key=True)  # Auto-increment primary key
+    full_name = models.CharField(max_length=255)
+    contact_number = models.CharField(max_length=15)
+    username = models.CharField(max_length=150, unique=True)  # Unique username
+    password = models.CharField(max_length=128)  # Password field
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)  # Nullable QR code field
+
+    def __str__(self):
+        return self.full_name

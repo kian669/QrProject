@@ -100,6 +100,43 @@
         </div>
     </div>
 
+   <!-- Modal for Employee Information -->
+<div class="modal fade" id="employeeInfoModal" tabindex="-1" aria-labelledby="employeeInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="employeeInfoModalLabel">Employee Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="employeeInfoForm" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="employeeName" class="form-label">Employee Name</label>
+                        <input type="text" class="form-control" id="employeeName" name="employee_name" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeeID" class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" id="employeeID" name="employee_id" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeeContact" class="form-label">Contact Number</label>
+                        <input type="text" class="form-control" id="employeeContact" name="employee_contact" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeeStatus" class="form-label">Status</label>
+                        <input type="text" class="form-control" id="employeeStatus" name="employee_status" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 </div>
 
 <style>
@@ -150,7 +187,7 @@
 
  
 <script>
-    // Function to populate the vehicle dropdown dynamically
+   
 function populateVehicleDropdown(vehicles) {
     const vehicleSelect = document.getElementById('vehicleType');
     
@@ -286,7 +323,7 @@ function populateVehicleDropdown(vehicles) {
                                 qrData.textContent = "Student ID: " + data.student_id + ", Name: " + data.student_name;
                             }
         
-                            if (data.student_name) {
+                            if (data.student_name) {    
                                 document.getElementById('studentName').value = data.student_name;
                                 document.getElementById('studentID').value = data.student_id;
                                 document.getElementById('firstName').value = data.first_name || ''; // Assuming data.first_name exists
@@ -304,6 +341,24 @@ function populateVehicleDropdown(vehicles) {
                                 const newModal = new bootstrap.Modal(document.getElementById('studentInfoModal'));
                                 newModal.show();
                             }
+                            if (data.employee_name) {
+                                // Populate the employee info modal with data
+                                document.getElementById('employeeName').value = data.employee_name;
+                                document.getElementById('employeeID').value = data.employee_id;
+                                document.getElementById('employeeContact').value = data.contact_number || '';
+                                document.getElementById('employeeStatus').value = data.status || '';
+                        
+                                // Check if modal is already active, hide if so
+                                const employeeInfoModal = bootstrap.Modal.getInstance(document.getElementById('employeeInfoModal'));
+                                if (employeeInfoModal) {
+                                    employeeInfoModal.hide();
+                                }
+                        
+                                // Show the employee info modal
+                                const newModal = new bootstrap.Modal(document.getElementById('employeeInfoModal'));
+                                newModal.show();
+                            }
+                            
                         }
                     })
                     .catch(error => console.error('Error processing QR code:', error));

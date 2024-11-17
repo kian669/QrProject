@@ -1,0 +1,56 @@
+{% extends 'qrapp/base.html' %}
+
+{% block content %}
+<h2>My Vehicle</h2>
+
+<!-- Add Vehicle Button -->
+<div class="mb-3">
+  <a href="{% url 'add-vehicle-employee' %}" class="btn btn-primary">Add Vehicle</a>
+</div>
+
+{% if vehicles %}
+    <table id="vehicle-table" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Plate Number</th>
+                <th>Vehicle Type</th>
+                <th>OR Upload</th>
+                <th>CR Upload</th>
+                <th>License Upload</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vehicle in vehicles %}
+            <tr>
+                <td>{{ vehicle.plate_number }}</td>
+                <td>{{ vehicle.get_vehicle_type_display }}</td>
+                <td><a href="{{ vehicle.or_upload.url }}" target="_blank">View OR</a></td>
+                <td><a href="{{ vehicle.cr_upload.url }}" target="_blank">View CR</a></td>
+                <td><a href="{{ vehicle.license_upload.url }}" target="_blank">View License</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have not added any vehicles yet.</p>
+{% endif %}
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#vehicle-table').DataTable({
+            "paging": true,          // Enables pagination
+            "searching": true,       // Enables search box
+            "ordering": true,        // Enables column sorting
+            "info": true,            // Shows table info
+            "lengthMenu": [10, 25, 50, 100], // Entries to show
+        });
+    });
+</script>
+{% endblock %}
