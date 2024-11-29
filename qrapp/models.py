@@ -28,22 +28,27 @@ class User(AbstractUser):
 
 
 class Student(models.Model):
+    COURSE_CHOICES = [
+        ('CAS', 'CAS'),
+        ('COTE', 'COTE'),
+        ('COMED', 'COMED'),
+        ('CTE', 'CTE'),
+        ('CGS', 'CGS'),
+    ]
+
     student_id = models.CharField(max_length=20, unique=True)
     username = models.CharField(max_length=50)
     first_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     email = models.EmailField(unique=True)
-    course = models.CharField(max_length=100)
+    course = models.CharField(max_length=100, choices=COURSE_CHOICES)
     year = models.CharField(max_length=10)
     major = models.CharField(max_length=100)
-    # or_upload = models.FileField(upload_to='uploads/or/')
-    # cr_upload = models.FileField(upload_to='uploads/cr/')
-    # license_upload = models.FileField(upload_to='uploads/license/')
     password = models.CharField(max_length=128, blank=True, null=False)
-
 
     def __str__(self):
         return f"{self.username} ({self.student_id})"
+
     
 class StudentMasterList(models.Model):
         student_id = models.CharField(max_length=20, unique=True)
@@ -104,6 +109,7 @@ class Violation(models.Model):
     def __str__(self):
         return f"{self.username} - {self.violations} ({self.vehicle_type})"
     
+
     
 class Logs(models.Model):
     LOG_TYPE_CHOICES = [
@@ -123,7 +129,13 @@ class Logs(models.Model):
     
     
 class Vehicle(models.Model):
+    PLATE_TYPE_CHOICES = [
+        ('temporary', 'Temporary Plate'),
+        ('permanent', 'Permanent Plate'),
+        ('improvised', 'Improvised Plate'),
+    ]
     plate_number = models.CharField(max_length=20, unique=True)
+    plate_type = models.CharField(max_length=15, choices=PLATE_TYPE_CHOICES, null=True, blank=True)  # Add this field
     or_upload = models.FileField(upload_to='uploads/or/')
     cr_upload = models.FileField(upload_to='uploads/cr/')
     license_upload = models.FileField(upload_to='uploads/license/')
@@ -136,7 +148,13 @@ class Vehicle(models.Model):
     
 
 class EmployeeVehicle(models.Model):
+    PLATE_TYPE_CHOICES = [
+        ('temporary', 'Temporary Plate'),
+        ('permanent', 'Permanent Plate'),
+        ('improvised', 'Improvised Plate'),
+    ]
     plate_number = models.CharField(max_length=20, unique=True)
+    plate_number_type = models.CharField(max_length=15, choices=PLATE_TYPE_CHOICES, null=True, blank=True)
     or_upload = models.FileField(upload_to='uploads/or/')
     cr_upload = models.FileField(upload_to='uploads/cr/')  
     license_upload = models.FileField(upload_to='uploads/license/')
@@ -165,3 +183,42 @@ class Employee(models.Model):
 
     def __str__(self):
         return self.full_name
+    
+
+class EmployeePendingRegistration(models.Model):
+    STATUS_CHOICES = [
+        ('regular', 'Regular'),
+        ('contract', 'Contract of Service'),
+    ]
+
+    id = models.AutoField(primary_key=True)  # Auto-increment primary key
+    full_name = models.CharField(max_length=255)
+    contact_number = models.CharField(max_length=15)
+    username = models.CharField(max_length=150, unique=True)  # Unique username
+    password = models.CharField(max_length=128)  # Password field
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    
+   
+    def __str__(self):
+        return f"{self.full_name} (Pending Registration)"    
+
+class EmployeeViolation(models.Model):
+    employee_id = models.CharField(max_length=20)
+    full_name = models.CharField(max_length=255, blank=True, null=True)  # Full name of the employee
+    vehicle_type = models.CharField(max_length=50)
+    violations = models.CharField(max_length=255)
+    date_created = models.DateTimeField(default=timezone.now)  # Date of violation
+    offense_count = models.PositiveIntegerField(blank=True, null=True)  # Number of offenses
+
+    def __str__(self):
+        return f"{self.full_name} - {self.violations} ({self.vehicle_type})"
+
+
+class EmployeeNotification(models.Model):
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    is_read = models.BooleanField(default=False)  # Mark if the notification is read
+    date_created = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"Notification for {self.employee}: {self.message}"

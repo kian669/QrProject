@@ -149,3 +149,7 @@ EMAIL_HOST_USER = 'pitad21.barrokianfrancis@gmail.com'  # Replace with your emai
 EMAIL_HOST_PASSWORD = 'rabp sraf noym uyno'  # Replace with your app-specific password or actual password
 DEFAULT_FROM_EMAIL = 'pitad21.barrokianfrancis@gmail.com'
 
+
+SECRET_QR_KEY = b'your-generated-key'
+
+

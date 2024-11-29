@@ -1,70 +1,154 @@
 {% extends 'qrapp/base.html' %}
 
 {% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles</title>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include DataTables CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <!-- Include Bootstrap CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Include Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .card-header {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+        }
+        .table-primary {
+            background-color: #f8f9fa;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
     <div class="container mt-0">
-        <h1>Student Vehicles</h1>
+        <!-- Header -->
+        <div class="card shadow">
+            <div class="card-header text-center">
+                <h3 class="mb-0">Vehicles</h3>
+            </div>
+        </div>
 
-        <!-- Table for displaying vehicles -->
-        <table id="vehiclesTable" class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>Plate Number</th>
-                    <th>OR Upload</th>
-                    <th>CR Upload</th>
-                    <th>License Upload</th>
-                    <th>Vehicle Type</th>
-                    <th>Student ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for vehicle in vehicles %}
-                    <tr>
-                        <td>{{ vehicle.plate_number }}</td>
-                        <td><a href="#" class="view-image" data-image-url="{{ vehicle.or_upload.url }}">View</a></td>
-                        <td><a href="#" class="view-image" data-image-url="{{ vehicle.cr_upload.url }}">View</a></td>
-                        <td><a href="#" class="view-image" data-image-url="{{ vehicle.license_upload.url }}">View</a></td>
-                        <td>{{ vehicle.vehicle_type }}</td>
-                        <td>{{ vehicle.student_id.student_id }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <!-- Table -->
+        <div class="card shadow mt-4">
+            <div class="card-body">
+                <table id="mergedVehiclesTable" class="table table-hover table-striped table-bordered">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Plate Number</th>
+                            <th>OR Upload</th>
+                            <th>CR Upload</th>
+                            <th>License Upload</th>
+                            <th>Vehicle Type</th>
+                            <th>Plate # Status</th>
+                            <th>Owner</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Student Vehicle Records -->
+                        {% for vehicle in student_vehicles %}
+                            <tr>
+                                <td>{{ vehicle.plate_number }}</td>
+                                <td>
+                                    <a href="#" class="view-image" data-image-url="{{ vehicle.or_upload.url }}">
+                                        <i class="bi bi-file-earmark-fill"></i> View
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="#" class="view-image" data-image-url="{{ vehicle.cr_upload.url }}">
+                                        <i class="bi bi-file-earmark-fill"></i> View
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="#" class="view-image" data-image-url="{{ vehicle.license_upload.url }}">
+                                        <i class="bi bi-file-earmark-fill"></i> View
+                                    </a>
+                                </td>
+                                <td>{{ vehicle.vehicle_type }}</td>
+                                <td>{{ vehicle.get_plate_type_display }}</td>
+                                <td>{{ vehicle.student_id.student_id }}</td>
+                                <td>Student</td>
+                            </tr>
+                        {% endfor %}
 
-    <!-- Modal Structure for Viewing Image -->
-    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imageModalLabel">Document Preview</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img id="modalImage" src="" class="img-fluid" alt="Document Image">
+                        <!-- Employee Vehicle Records -->
+                        {% for vehicle in employee_vehicles %}
+                            <tr>
+                                <td>{{ vehicle.plate_number }}</td>
+                                <td>
+                                    <a href="#" class="view-image" data-image-url="{{ vehicle.or_upload.url }}">
+                                        <i class="bi bi-file-earmark-fill"></i> View
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="#" class="view-image" data-image-url="{{ vehicle.cr_upload.url }}">
+                                        <i class="bi bi-file-earmark-fill"></i> View
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="#" class="view-image" data-image-url="{{ vehicle.license_upload.url }}">
+                                        <i class="bi bi-file-earmark-fill"></i> View
+                                    </a>
+                                </td>
+                                <td>{{ vehicle.vehicle_type }}</td>
+                                <td>{{ vehicle.get_plate_number_type_display }}</td>
+                                <td>{{ vehicle.employee_id.full_name }}</td>
+                                <td>Employee</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Document Preview Modal -->
+        <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="imageModalLabel">Document Preview</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <img id="modalImage" src="" alt="Document Image">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Include jQuery, DataTables, and Bootstrap JS & CSS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Initialize the DataTable and Modal Script -->
     <script>
-        $(document).ready(function() {
-            $('#vehiclesTable').DataTable();
+        $(document).ready(function () {
+            $('#mergedVehiclesTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthMenu: [[10, 20, 50, -1], [10, 20, 50, "All"]]
+            });
 
-            // Event delegation for dynamically handled elements
-            $('#vehiclesTable').on('click', '.view-image', function(e) {
-                e.preventDefault();  // Prevent default anchor behavior
-                var imageUrl = $(this).data('image-url');  // Get the image URL from data attribute
-                $('#modalImage').attr('src', imageUrl);  // Set image URL in modal
-                $('#imageModal').modal('show');  // Show the modal
+            // View image in modal
+            $('#mergedVehiclesTable').on('click', '.view-image', function (e) {
+                e.preventDefault();
+                const imageUrl = $(this).data('image-url');
+                $('#modalImage').attr('src', imageUrl);
+                $('#imageModal').modal('show');
             });
         });
     </script>
+</body>
+</html>
 {% endblock %}

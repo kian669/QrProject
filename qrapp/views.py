@@ -37,7 +37,51 @@ from django.db.models import Count
 from .forms import VehicleForm
 from datetime import timedelta
 from django.contrib.auth.models import User
-from .models import Employee,EmployeeVehicle
+from .models import Employee,EmployeeVehicle, EmployeeViolation,EmployeeNotification,EmployeePendingRegistration
+
+def employee_notifications(request):
+    # Get the logged-in employee's ID from the session
+    employee_id = request.session.get('employee_id')
+
+    if employee_id:
+        # Fetch notifications for the logged-in employee
+        notifications = EmployeeNotification.objects.filter(employee_id=employee_id).order_by('-date_created')
+    else:
+        notifications = []
+
+    return render(request, 'qrapp/employee-notif.html', {'notifications': notifications})
+
+
+def submit_employee_violation(request):
+    if request.method == 'POST':
+        employee_id = request.POST.get('employee_id')
+        full_name = request.POST.get('employee_name')  # Adjusted field name to match form
+        vehicle_type = request.POST.get('employee_vehicle_type')  # Adjusted field name to match form
+        violations = request.POST.get('employee_violation')  # Adjusted field name to match form
+        print(f"ID: {employee_id}, Name: {full_name}, Vehicle: {vehicle_type}, Violations: {violations}")
+        # Check if the employee already has violation records
+        existing_violations = EmployeeViolation.objects.filter(employee_id=employee_id)
+        offense_count = existing_violations.count() + 1  # Set offense count based on existing violations
+
+        # Create a new violation record with date_created and offense_count
+        EmployeeViolation.objects.create(
+            employee_id=employee_id,
+            full_name=full_name,
+            vehicle_type=vehicle_type,
+            violations=violations,
+            date_created=timezone.now(),
+            offense_count=offense_count,
+        )
+        
+        # Create a notification for the employee
+        employee = Employee.objects.get(id=employee_id)
+        message = f"You have a new violation: {violations}"
+        EmployeeNotification.objects.create(employee=employee, message=message)
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False})
+
+
 
 def employee_list(request):
     employees = Employee.objects.all()
@@ -60,10 +104,12 @@ def my_vehicle_employee(request):
 def add_employee_vehicle(request):
     if request.method == 'POST':
         plate_number = request.POST['plate_number']
+        plate_number_type = request.POST['plate_number_type']
         or_upload = request.FILES['or_upload']
         cr_upload = request.FILES['cr_upload']
         license_upload = request.FILES['license_upload']
         vehicle_type = request.POST['vehicle_type']
+        
         
         # Get the employee_id from the session
         employee_id = request.session.get('employee_id')
@@ -78,6 +124,7 @@ def add_employee_vehicle(request):
         # Create the EmployeeVehicle instance
         EmployeeVehicle.objects.create(
             plate_number=plate_number,
+            plate_number_type=plate_number_type,
             or_upload=or_upload,
             cr_upload=cr_upload,
             license_upload=license_upload,
@@ -94,6 +141,77 @@ def add_employee_vehicle(request):
 def employee_dashboard(request):
     return render(request, 'qrapp/employee-dashboard.html')
 
+# def employee_form(request):
+#     if request.method == 'POST':
+#         full_name = request.POST.get('full_name')
+#         contact_number = request.POST.get('contact_number')
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         status = request.POST.get('status')
+
+#         # Hash the password
+#         hashed_password = make_password(password)
+
+#         # Create the Employee object (initial save)
+#         employee = Employee.objects.create(
+#             full_name=full_name,
+#             contact_number=contact_number,
+#             username=username,
+#             password=hashed_password,
+#             status=status
+#         )
+
+#         # Generate QR Code
+#         qr = qrcode.QRCode(version=1, box_size=10, border=5)
+#         qr.add_data(str(employee.id))  # Just the ID without "Employee ID: "
+#         qr.make(fit=True)
+
+#         # Save QR Code to ImageField
+#         img = qr.make_image(fill='black', back_color='white')
+#         buffer = BytesIO()
+#         img.save(buffer, format='PNG')
+#         file_name = f'employee_{employee.id}_qr.png'
+#         employee.qr_code.save(file_name, ContentFile(buffer.getvalue()))
+#         buffer.close()
+
+#         return redirect('unified-login')  # Replace with your desired redirect URL name or view
+
+#     return render(request, 'qrapp/employee-register.html')
+
+def approve_pending_employee(request, pk):
+    # Retrieve the pending employee record
+    pending_employee = get_object_or_404(EmployeePendingRegistration, pk=pk)
+
+    # Transfer data to the Employee model
+    employee = Employee.objects.create(
+        full_name=pending_employee.full_name,
+        contact_number=pending_employee.contact_number,
+        username=pending_employee.username,
+        password=pending_employee.password,  # Password is already hashed
+        status=pending_employee.status,
+    )
+
+    # Generate a QR code for the approved employee
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(str(employee.id))
+    qr.make(fit=True)
+
+    # Save the QR code as an image
+    img = qr.make_image(fill="black", back_color="white")
+    buffer = BytesIO()
+    img.save(buffer, format="PNG")
+    file_name = f'employee_{employee.id}_qr.png'
+    employee.qr_code.save(file_name, ContentFile(buffer.getvalue()))
+    buffer.close()
+
+    # Delete the pending record after approval
+    pending_employee.delete()
+
+    # Return success response or redirect
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # For AJAX requests
+        return JsonResponse({'success': True, 'message': 'Employee approved successfully!'})
+    return redirect('pending-registrations')  # Replace with your desired URL
+
 def employee_form(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
@@ -105,27 +223,14 @@ def employee_form(request):
         # Hash the password
         hashed_password = make_password(password)
 
-        # Create the Employee object (initial save)
-        employee = Employee.objects.create(
+        # Save to EmployeePendingRegistration model
+        pending_employee = EmployeePendingRegistration.objects.create(
             full_name=full_name,
             contact_number=contact_number,
             username=username,
             password=hashed_password,
             status=status
         )
-
-        # Generate QR Code
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(str(employee.id))  # Just the ID without "Employee ID: "
-        qr.make(fit=True)
-
-        # Save QR Code to ImageField
-        img = qr.make_image(fill='black', back_color='white')
-        buffer = BytesIO()
-        img.save(buffer, format='PNG')
-        file_name = f'employee_{employee.id}_qr.png'
-        employee.qr_code.save(file_name, ContentFile(buffer.getvalue()))
-        buffer.close()
 
         return redirect('unified-login')  # Replace with your desired redirect URL name or view
 
@@ -188,8 +293,14 @@ def unified_login(request):
 
 
 def all_vehicles(request):
-    vehicles = Vehicle.objects.all()
-    return render(request, 'qrapp/all_vehicles.html', {'vehicles': vehicles})
+    student_vehicles = Vehicle.objects.all()
+    employee_vehicles = EmployeeVehicle.objects.all()
+
+    context = {
+        'student_vehicles': student_vehicles,
+        'employee_vehicles': employee_vehicles,
+    }
+    return render(request, 'qrapp/all_vehicles.html', context)
 
 def approve_student(request, student_id):
     student = get_object_or_404(Student, id=student_id)
@@ -362,8 +473,9 @@ def pending_registration(request):
     
     return render(request, 'qrapp/pending-registration.html', context)
 
-
-
+def employee_pending(request):
+    pending_employees = EmployeePendingRegistration.objects.all()
+    return render(request, 'qrapp/employee-pending-registrations.html', {'pending_employees': pending_employees})
 
 def custom_logout_view(request):
     logout(request)
@@ -506,7 +618,13 @@ def security_login(request):
 
 
 def security_dashboard(request):
-    return render(request, 'qrapp/security-dashboard.html')
+    violations = Violation.objects.all()  # Get violations from Violation model
+    employee_violations = EmployeeViolation.objects.all()  # Get violations from EmployeeViolation model
+
+    # Merge both sets of violations
+    all_violations = list(violations) + list(employee_violations)
+
+    return render(request, 'qrapp/security-dashboard.html', {'violations': all_violations})
 
 
 def qr_code_scanner_view(request):
@@ -546,6 +664,8 @@ def scan_qr_code(request):
                         offense_count = Violation.objects.filter(student_id=qr_code_data).count()
                         print(student.username)
                         vehicles = Vehicle.objects.filter(student_id=student)
+                        for vehicle in vehicles:
+                            print(vehicle)
 
                         response_data = {
                             'qr_code_data': qr_code_data,
@@ -573,6 +693,9 @@ def scan_qr_code(request):
                     try:
                         employee = Employee.objects.get(id=int(qr_code_data))  
                         print(f"Employee Data: {employee.full_name}, ID: {employee.id}, Contact: {employee.contact_number}, Status: {employee.status}")
+                        vehicles = EmployeeVehicle.objects.filter(employee_id=employee.id)  # Assuming `employee_id` is the foreign key
+                        for vehicle in vehicles:
+                            print(vehicle)
                         response_data = {
                             'qr_code_data': qr_code_data,
                             'employee_name': employee.full_name,
@@ -580,6 +703,15 @@ def scan_qr_code(request):
                             'contact_number': employee.contact_number,
                             'status': employee.status
                         }
+                        
+                        vehicle_options = []
+                        for vehicle in vehicles:
+                                vehicle_options.append({
+                                    'vehicle_type': vehicle.vehicle_type,
+                                    'plate_number': vehicle.plate_number
+                                })
+
+                        response_data['vehicles'] = vehicle_options
 
                         return JsonResponse(response_data)
 
@@ -603,7 +735,8 @@ def scan_student_qr_code(request):
         image_data = request.FILES.get('frame')
         if not image_data:
             return JsonResponse({'success': False, 'message': 'No image data found'})
-
+        
+        
         # Convert image data for OpenCV processing
         file_bytes = np.frombuffer(image_data.read(), np.uint8)
         img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
@@ -623,7 +756,7 @@ def scan_student_qr_code(request):
 
         if qr_code_data:
             try:
-                if qr_code_data.isnumeric():
+                if qr_code_data:
                     student = StudentMasterList.objects.get(student_id=qr_code_data)
 
                     # Get the latest log entry for the student
@@ -669,7 +802,10 @@ def scan_student_qr_code(request):
                 else:
                     return JsonResponse({'success': False, 'message': 'Invalid QR code data'})
             except StudentMasterList.DoesNotExist:
-                return JsonResponse({'success': False, 'message': 'Student not found'})
+                  return JsonResponse({
+                    "success": False,
+                    "qr_detected": True
+                })  # QR detected but no match
 
         return JsonResponse({'success': False, 'message': 'QR code not detected'})
     
@@ -708,7 +844,7 @@ def submit_violation(request):
         student_id = request.POST.get('student_id')
         vehicle_type = request.POST.get('vehicle_type')
         violations = request.POST.get('violations')
-
+        
         # Check if the student already has violation records
         existing_violations = Violation.objects.filter(student_id=student_id)
         offense_count = existing_violations.count() + 1  # Set offense count based on existing violations
@@ -732,7 +868,8 @@ def submit_violation(request):
 
 def violation_list(request):
     violations = Violation.objects.all()
-    return render(request, 'qrapp/violations.html', {'violations': violations})
+    employee_violations = EmployeeViolation.objects.all()
+    return render(request, 'qrapp/violations.html', {'violations': violations,'employee_violations': employee_violations})
 
 def reject_student(request, student_id):
     # Fetch the student record or return a 404 error if not found

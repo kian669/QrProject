@@ -7,6 +7,7 @@ from .views import custom_logout_view
 from .views import security_logout_view
 from .views import student_logout_view
 from .views import submit_violation
+from .views import submit_employee_violation
 from .views import reject_student
 from . import views 
 from .views import approve_student, activate_student, unified_login
@@ -53,6 +54,10 @@ urlpatterns = [
     path('my-vehicle-employee/', views.my_vehicle_employee, name='my-vehicle-employee'),
     path('all-employee-vehicle/', views.all_employee_vehicle, name='all-employee-vehicle'),
     path('employee-list/', views.employee_list, name='employee-list'),
+    path('submit_employee_violation/', submit_employee_violation, name='submit_employee_violation'),
+    path('employee-notifications/', views.employee_notifications, name='employee-notifications'),
+    path('employee-pending/', views.employee_pending, name='employee-pending'),
+    path('approve-employee/<int:pk>/', views.approve_pending_employee, name='approve-employee'), 
 ]
 
 if settings.DEBUG:

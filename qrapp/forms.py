@@ -13,9 +13,10 @@ from django.utils.translation import gettext_lazy as _
 class VehicleForm(forms.ModelForm):
     class Meta:
         model = Vehicle
-        fields = ['plate_number', 'or_upload', 'cr_upload', 'license_upload', 'vehicle_type']
+        fields = ['plate_number','plate_type', 'or_upload', 'cr_upload', 'license_upload', 'vehicle_type']
         widgets = {
             'plate_number': forms.TextInput(attrs={'class': 'form-control'}),
+            'plate_type': forms.Select(attrs={'class': 'form-control'}),
             'or_upload': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'cr_upload': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
             'license_upload': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
@@ -79,21 +80,49 @@ class StudentLoginForm(forms.Form):
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'})
     )
         
-        
 class StudentRegistrationForm(forms.ModelForm):
     class Meta:
-        model = Student
-        fields = [
-            'student_id', 'username', 'email', 'first_name', 'last_name', 
-            'course', 'year', 'major', 'password'
-        ]
-        # widgets = {
-        #     'or_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
-        #     'cr_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
-        #     'license_upload': forms.ClearableFileInput(attrs={'accept': 'image/*,application/pdf'}),
-        #     'password': PasswordInput(),
-        # }
-        
+        model = Student  # Replace with your actual model
+        fields = ['first_name', 'last_name', 'student_id', 'username', 'email', 'course', 'year', 'major', 'password']
+        widgets = {
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your first name'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your last name'
+            }),
+            'student_id': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your student ID'
+            }),
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Choose a username'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your email address'
+            }),
+            'course': forms.Select(attrs={
+                'class': 'form-select',
+                'placeholder': 'Select your course'
+            }),
+            'year': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your year level'
+            }),
+            'major': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter your major'
+            }),
+            'password': forms.PasswordInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Create a password'
+            }),
+        }
+
 
         
 # Register head

@@ -58,7 +58,7 @@
                             <tr>
                                 <th>Student ID</th>
                                 <th>Name</th>
-                                <th>Course</th>
+                                <th>College</th>
                                 <th>Log Type</th>
                                 <th>Log Time</th>
                             </tr>
@@ -145,7 +145,15 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/howler"></script>
 <script>
+    var beep = new Howl({
+        src: ['{% static "beep.mp3" %}']  // Reference the beep sound using Django's static tag
+      });
+    
+    var getout = new Howl({
+        src: ['{% static "getout.mp3" %}']  // Reference the beep sound using Django's static tag
+      });
   // JavaScript for real-time clock and date
 function updateTime() {
     const clock = document.getElementById('realTimeClock');
@@ -181,7 +189,10 @@ updateTime();
     
     
     let isScanning = false;
-
+    const scanInterval = 100; // Delay between scans (in ms)
+    let lastScanTimes = {}; // Dictionary to track last scan times for each student
+    let lastInvalidScanTime = 0; // Track time of the last invalid scan
+    
     async function startCamera() {
         const video = document.getElementById('video');
         try {
@@ -190,7 +201,7 @@ updateTime();
             video.play();
             requestAnimationFrame(scanFrame);
         } catch (error) {
-            console.error("Error accessing the camera: ", error);
+            console.error("Camera access error:", error);
             Toastify({
                 text: "Unable to access camera",
                 duration: 3000,
@@ -198,10 +209,6 @@ updateTime();
             }).showToast();
         }
     }
-
-    let lastScanTimes = {};  // Dictionary to track last scan times for each student
-    const sameStudentInterval = 10000; // 1 minute for the same student
-    const differentStudentInterval = 200; // 1 second for different students
     
     async function scanFrame() {
         const video = document.getElementById('video');
@@ -213,67 +220,84 @@ updateTime();
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-            const formData = new FormData();
-            canvas.toBlob(function (blob) {
-                formData.append('frame', blob);
+            const currentTime = new Date().getTime();
     
-                const currentTime = new Date().getTime();
-                if (!isScanning) {
-                    isScanning = true;
+            // Only start scanning if not currently scanning
+            if (!isScanning) {
+                isScanning = true;
     
-                    $.ajax({
-                        type: "POST",
-                        url: "{% url 'scan_student_qr_code' %}",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function (response) {
-                            if (response.success) {
-                                const studentId = response.student.student_id;
+                setTimeout(() => {
+                    // Convert canvas to blob
+                    canvas.toBlob(function (blob) {
+                        const formData = new FormData();
+                        formData.append('frame', blob);
     
-                                // Record the last scan time for this student
-                                const lastStudentScanTime = lastScanTimes[studentId] || 0;
-                                const timeElapsed = currentTime - lastStudentScanTime;
+                        // Send frame to server for QR code scan
+                        $.ajax({
+                            type: "POST",
+                            url: "{% url 'scan_student_qr_code' %}",
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function (response) {
+                                if (response.success && response.student) {
+                                    const studentId = response.student.student_id;
+                                    const lastStudentScanTime = lastScanTimes[studentId] || 0;
+                                    const timeElapsed = currentTime - lastStudentScanTime;
     
-                                // Set interval condition based on whether it's the same or different student
-                                const interval = lastScanTimes[studentId] ? sameStudentInterval : differentStudentInterval;
+                                    if (timeElapsed >= scanInterval) {
+                                        lastScanTimes[studentId] = currentTime;
     
-                                if (timeElapsed >= interval) {
-                                    lastScanTimes[studentId] = currentTime;
+                                        // Update DataTable with student info
+                                        const table = $('#recentLogins').DataTable();
+                                        table.row.add([
+                                            response.student.student_id,
+                                            response.student.username,
+                                            response.student.course,
+                                            response.student.log_type,
+                                            response.student.log_time,
+                                        ]).draw(false);
     
-                                    // Update DataTable: Insert a new row at the top for each scan
-                                    const table = $('#recentLogins').DataTable();
-                                    table.row.add([
-                                        response.student.student_id,
-                                        response.student.username,
-                                        response.student.course, 
-                                        response.student.log_type,
-                                        response.student.log_time,
-                                    ]).draw(false);
+                                        // Show success notification
+                                        Toastify({
+                                            text: "QR Detected: " + response.student.username,
+                                            duration: 1500,
+                                            style: { background: "green" },
+                                        }).showToast();
+                                        beep.play();
+                                    }
+                                } else if (response.qr_detected) {
+                                    // Show "Invalid QR Code" only if a QR is detected and it's invalid
+                                    const timeSinceLastInvalidScan = currentTime - lastInvalidScanTime;
+                                    if (timeSinceLastInvalidScan > 3000) { // Prevent rapid invalid scans
+                                        lastInvalidScanTime = currentTime;
     
-                                    // Reorder the table to keep the most recent entry on top
-                                    table.order([0, 'asc']).draw();
-    
-                                    // Show success notification
-                                    Toastify({
-                                        text: "QR Detected: " + response.student.username,
-                                        duration: 500,
-                                        style: { background: "green" },
-                                    }).showToast();
+                                        Toastify({
+                                            text: "Invalid QR Code",
+                                            duration: 3000,
+                                            backgroundColor: "red",
+                                        }).showToast();
+                                        getout.play();
+                                    }
                                 }
+                            },
+                            error: function () {
+                                console.error("Error processing the QR code");
+                            },
+                            complete: function () {
+                                isScanning = false; // Reset scanning state
                             }
-                        },
-                        complete: function () {
-                            setTimeout(() => {
-                                isScanning = false;
-                            }, differentStudentInterval);
-                        }
-                    });
-                }
-            }, 'image/jpeg');
+                        });
+                    }, 'image/jpeg');
+                }, scanInterval);
+            }
         }
+    
+        // Continue scanning
         requestAnimationFrame(scanFrame);
     }
+    
+    // Start the camera and scanning process
     startCamera();
     
 </script>

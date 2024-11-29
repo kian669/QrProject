@@ -81,7 +81,7 @@
                             <td id="modalLastName"></td>
                         </tr>
                         <tr>
-                            <th>Course</th>
+                            <th>College</th>
                             <td id="modalCourse"></td>
                         </tr>
                         <tr>
@@ -121,9 +121,17 @@
                 </div> {% endcomment %}
 
                 <!-- QR Code Preview -->
-                <p><strong>QR Code:</strong> 
-                    <img id="modalQrCode" src="" alt="QR Code" class="img-fluid" style="max-width: 150px;">
-                </p>
+                <div class="text-left">
+                    <div>
+                        <p class="mb-0"><strong>QR Code:</strong></p>
+                        <img id="modalQrCode" src="" alt="QR Code" class="img-fluid" style="max-width: 150px;">
+                    </div>
+                    <button id="downloadQrCodeBtn" class="btn btn-success btn-sm mt-2">
+                        <i class="bi bi-download"></i> Download QR Code
+                    </button>
+                </div>
+                
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -201,6 +209,18 @@
 
 <script>
     $(document).ready(function() {
+        $('#downloadQrCodeBtn').click(function () {
+            const qrCodeImg = document.getElementById('modalQrCode');
+            const qrCodeSrc = qrCodeImg.src;
+    
+            // Create an anchor element to download the file
+            const link = document.createElement('a');
+            link.href = qrCodeSrc;
+            link.download = 'qr_code.png'; // Specify the file name
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
         // Initialize DataTable
         $('#masterListTable').DataTable({
             "paging": true,

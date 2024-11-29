@@ -8,44 +8,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Employee Vehicle</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Add Employee Vehicle</h2>
-        <form method="post" enctype="multipart/form-data" action="{% url 'add-vehicle-employee' %}">
-            {% csrf_token %}
-            
-            <div class="mb-3">
-                <label for="plate_number" class="form-label">Plate Number</label>
-                <input type="text" class="form-control" id="plate_number" name="plate_number" maxlength="20" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="or_upload" class="form-label">OR Upload</label>
-                <input type="file" class="form-control" id="or_upload" name="or_upload" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="cr_upload" class="form-label">CR Upload</label>
-                <input type="file" class="form-control" id="cr_upload" name="cr_upload" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="license_upload" class="form-label">License Upload</label>
-                <input type="file" class="form-control" id="license_upload" name="license_upload" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="vehicle_type" class="form-label">Vehicle Type</label>
-                <select class="form-select" id="vehicle_type" name="vehicle_type" required>
-                    <option value="" disabled selected>Select vehicle type</option>
-                    <option value="Car">Car</option>
-                    <option value="Motorcycle">Motorcycle</option>
-                </select>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Add Vehicle</button>
-        </form>
+<body class="bg-light">
+    <div class="container d-flex justify-content-center mt-0">
+        <div class="col-md-6 col-lg-5 bg-white p-4 rounded shadow">
+            <h2 class="mb-4 text-center text-primary">
+                <i class="fa-solid fa-car-side me-2"></i>Add Employee Vehicle
+            </h2>
+            <form method="post" enctype="multipart/form-data" action="{% url 'add-vehicle-employee' %}">
+                {% csrf_token %}
+
+                <!-- Plate Number -->
+                <div class="mb-3">
+                    <label for="plate_number" class="form-label d-flex align-items-center">
+                        <i class="fa-solid fa-car text-secondary me-2"></i> Plate Number
+                    </label>
+                    <input type="text" class="form-control" id="plate_number" name="plate_number" maxlength="20" placeholder="Enter plate number" required>
+                </div>
+
+                <!-- OR Upload -->
+                <div class="mb-3">
+                    <label for="or_upload" class="form-label d-flex align-items-center">
+                        <i class="fa-solid fa-file-arrow-up text-secondary me-2"></i> OR Upload
+                    </label>
+                    <input type="file" class="form-control" id="or_upload" name="or_upload" required>
+                </div>
+
+                <!-- CR Upload -->
+                <div class="mb-3">
+                    <label for="cr_upload" class="form-label d-flex align-items-center">
+                        <i class="fa-solid fa-file-lines text-secondary me-2"></i> CR Upload
+                    </label>
+                    <input type="file" class="form-control" id="cr_upload" name="cr_upload" required>
+                </div>
+
+                <!-- License Upload -->
+                <div class="mb-3">
+                    <label for="license_upload" class="form-label d-flex align-items-center">
+                        <i class="fa-solid fa-id-card text-secondary me-2"></i> License Upload
+                    </label>
+                    <input type="file" class="form-control" id="license_upload" name="license_upload" required>
+                </div>
+
+                <!-- Vehicle Type -->
+                <div class="mb-3">
+                    <label for="vehicle_type" class="form-label d-flex align-items-center">
+                        <i class="fa-solid fa-truck-pickup text-secondary me-2"></i> Vehicle Type
+                    </label>
+                    <select class="form-select" id="vehicle_type" name="vehicle_type" required>
+                        <option value="" disabled selected>Select vehicle type</option>
+                        <option value="Car">Car</option>
+                        <option value="Motorcycle">Motorcycle</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="plate_number_type" class="form-label d-flex align-items-center">
+                        <i class="fa-solid fa-car-side text-secondary me-2"></i> Plate Number Type
+                    </label>
+                    <select class="form-select" id="plate_number_type" name="plate_number_type" required>
+                        <option value="" disabled selected>Select plate number type</option>
+                        <option value="temporary">Temporary Plate</option>
+                        <option value="permanent">Permanent Plate</option>
+                        <option value="improvised">Improvised Plate</option>
+                    </select>
+                </div>
+                
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-plus-circle me-2"></i> Add Vehicle
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>

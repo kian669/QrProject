@@ -64,6 +64,10 @@
         .table tbody tr:hover {
             background-color: #f1f1f1;
         }
+        .table-container {
+            max-height: 400px; /* Set the height for vertical overflow */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
     </style>
 </head>
 <body>
@@ -139,38 +143,49 @@
                 <h5 class="card-title">Recent Incident Reports</h5>
             </div>
             <div class="card-body">
-                <!-- Added table-responsive class here -->
-                <div class="table-responsive">
+                <div class="table-container">
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Date</th>
-                                <th>Type</th>
-                                <th>Location</th>
+                                <th>Violations</th>
+                                <th>Vehicle Type and Plate Number</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>101</td>
-                                <td>2024-09-05</td>
-                                <td>Burglary</td>
-                                <td>Main Entrance</td>
-                                <td>Resolved</td>
-                            </tr>
-                            <tr>
-                                <td>102</td>
-                                <td>2024-09-06</td>
-                                <td>Suspicious Activity</td>
-                                <td>Parking Lot</td>
-                                <td>In Progress</td>
-                            </tr>
-                            <!-- More rows as needed -->
+                            {% for violation in violations %}
+                                <tr>
+                                    <td>{{ violation.id }}</td>
+                                    <td>{{ violation.date_created|date:"Y-m-d" }}</td>
+                                    <td>{{ violation.violations }}</td>
+                                    <td>
+                                        {% if violation.vehicle_type %}
+                                            {{ violation.vehicle_type }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if violation.offense_count %}
+                                            {{ violation.offense_count }} offenses
+                                        {% else %}
+                                            First offense
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No recent violations</td>
+                                </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
+</body>
+</html>
 {% endblock %}

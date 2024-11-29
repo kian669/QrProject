@@ -6,35 +6,53 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 
 <div class="container mt-0">
-    <h2 class="text-center mb-4">Violation Records</h2>
+    <h2 class="text-center mb-4">Violations</h2>
 
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-            <h4>Violation List</h4>
-        </div>  
-        <div class="card-body">
-            <table id="violationTable" class="table table-hover table-bordered table-striped">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Full Name</th>  <!-- Changed to Full Name -->
-                        <th>Student ID</th>
-                        <th>Vehicle and Plate Number</th>
-                        <th>Violations</th>
-                        <th>Date Created</th> 
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for violation in violations %}
-                    <tr>
-                        <td>{{ violation.first_name }} {{ violation.last_name }}</td>  <!-- Display Full Name -->
-                        <td>{{ violation.student_id }}</td>
-                        <td>{{ violation.vehicle_type }}</td>
-                        <td>{{ violation.violations }}</td>
-                        <td>{{ violation.date_created|date:"F j, Y, g:i a" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="row">
+        <!-- Merged Violations Table -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h4>Violation List</h4>
+                </div>  
+                <div class="card-body">
+                    <table id="violationTable" class="table table-hover table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Identification Number</th>
+                                <th>Type</th> <!-- Added a column for the type (Student/Employee) -->
+                                <th>Vehicle and Plate Number</th>
+                                <th>Violations</th>
+                                <th>Date Created</th> 
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for violation in violations %}
+                            <tr>
+                                <td>{{ violation.first_name }} {{ violation.last_name }}</td>
+                                <td>{{ violation.student_id }}</td>
+                                <td>Student</td> <!-- This will show 'Student' for student violations -->
+                                <td>{{ violation.vehicle_type }}</td>
+                                <td>{{ violation.violations }}</td>
+                                <td>{{ violation.date_created|date:"F j, Y, g:i a" }}</td>
+                            </tr>
+                            {% endfor %}
+
+                            {% for emp_violation in employee_violations %}
+                            <tr>
+                                <td>{{ emp_violation.full_name }}</td>
+                                <td>{{ emp_violation.employee_id }}</td>
+                                <td>Employee</td> <!-- This will show 'Employee' for employee violations -->
+                                <td>{{ emp_violation.vehicle_type }}</td>
+                                <td>{{ emp_violation.violations }}</td>
+                                <td>{{ emp_violation.date_created|date:"F j, Y, g:i a" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -54,15 +72,38 @@
             "info": true,
             "autoWidth": false,
             "responsive": true,
-            "pageLength": 5,  // Adjust the default number of rows shown per page
+            "pageLength": 5,
             "language": {
                 "search": "Filter records:",
                 "paginate": {
                     "previous": "Prev",
                     "next": "Next"
                 }
-            }
+            },
+            "dom": '<"top"f>rt<"bottom"p><"clear">' // Moves the search bar to the top
         });
     });
 </script>
+
+<style>
+    /* Make the search bar more compact */
+    .dataTables_filter input {
+        width: 250px; /* Set a fixed width */
+        height: 30px; /* Adjust height for compactness */
+        padding: 5px 10px; /* Add padding for better appearance */
+        font-size: 14px; /* Adjust font size */
+        border-radius: 4px; /* Optional: Rounded corners for a cleaner look */
+    }
+
+    /* Ensure the tables are responsive */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Add some margin for better spacing between elements */
+    .card-body {
+        padding: 1rem;
+    }
+</style>
+
 {% endblock %}

@@ -3,21 +3,30 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="vh-100 d-flex justify-content-center align-items-center position-relative" style="background-color: #f1f1f1;">
-    <div class="position-absolute w-100 h-100" style="background: url('{% static 'img/hero-bg.jpg' %}') no-repeat center center; background-size: cover; opacity: 0.5;"></div>
-
-    <!-- Car Animation -->
-    {% comment %} <div class="car-animation position-absolute">
-        <img src="{% static 'img/car4.png' %}" alt="Moving Car" class="animate__animated animate__slideInLeft" style="max-width: 150px;"> <!-- Reduced size -->
-    </div> {% endcomment %}
-
-    <div class="text-center position-relative z-index-2">
-        <!-- Logo -->
-        <img src="{% static 'img/pit.png' %}" alt="Logo" class="mb-4" style="max-width: 120px;">
+<section class="vh-100 d-flex justify-content-center align-items-center position-relative" style="height: 110vh;">
+    <!-- Overlay for Better Text Visibility -->
+    <div class="position-absolute w-100 h-100" style="background-color: rgba(0, 0, 0, 0.6); z-index: 2;"></div>
+    
+    <!-- Title and Logo Positioned Above the Car Images -->
+    <div class="text-center position-relative z-index-3 text-white">
+        <!-- Logo (centered) -->
+        <div class="logo-container mb-4" style="z-index: 3;">
+            <img src="{% static 'img/pit.png' %}" alt="Logo" class="logo">
+        </div>
         
         <!-- Title and Subtitle -->
-        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown">Vehicle Monitoring System</h1>
-        <p class="lead animate__animated animate__fadeInUp">Streamlining vehicle management for a safer community</p>
+        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInDown" style="z-index: 3;">Vehicle Monitoring System</h1>
+        <p class="lead animate__animated animate__fadeInUp" style="z-index: 3;">Streamlining vehicle management for a safer community</p>
+        
+        <!-- Call-to-Action Button -->
+       
+    </div>
+
+    <!-- Background Slideshow -->
+    <div class="slideshow-container position-absolute w-100 h-100" style="z-index: 1;">
+        <div class="slide" style="background-image: url('{% static 'img/carback.jpg' %}');"></div>
+        <div class="slide" style="background-image: url('{% static 'img/carback2.jpg' %}');"></div>
+        <div class="slide" style="background-image: url('{% static 'img/carback4.jpg' %}');"></div>
     </div>
 </section>
 
@@ -27,8 +36,8 @@
         <h2 class="fw-bold text-uppercase mb-4 text-success">Our Features</h2>
         <div class="row">
             <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
+                <div class="card h-100 shadow-lg hover-shadow border-0">
+                    <div class="card-body text-center">
                         <i class="bi bi-speedometer2 display-3 text-success mb-3"></i>
                         <h5 class="card-title">Real-time Monitoring</h5>
                         <p class="card-text">Track vehicles in real-time to enhance security and efficiency.</p>
@@ -36,8 +45,8 @@
                 </div>
             </div>
             <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
+                <div class="card h-100 shadow-lg hover-shadow border-0">
+                    <div class="card-body text-center">
                         <i class="bi bi-bar-chart-line-fill display-3 text-success mb-3"></i>
                         <h5 class="card-title">Detailed Analytics</h5>
                         <p class="card-text">Access comprehensive reports and analytics to make data-driven decisions.</p>
@@ -45,8 +54,8 @@
                 </div>
             </div>
             <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
+                <div class="card h-100 shadow-lg hover-shadow border-0">
+                    <div class="card-body text-center">
                         <i class="bi bi-lock-fill display-3 text-success mb-3"></i>
                         <h5 class="card-title">Enhanced Security</h5>
                         <p class="card-text">Ensure safety with advanced security measures for vehicles.</p>
@@ -61,7 +70,8 @@
 <section id="about" class="py-5 bg-white text-dark">
     <div class="container text-center">
         <h2 class="fw-bold text-uppercase mb-4 text-success">About Us</h2>
-        <p class="lead">Our mission is to provide seamless vehicle monitoring solutions, helping organizations maintain safety and efficiency. With cutting-edge technology and a dedicated team, we ensure top-notch service for all our clients.</p>
+        <p class="lead mb-5">Our mission is to provide seamless vehicle monitoring solutions, helping organizations maintain safety and efficiency. With cutting-edge technology and a dedicated team, we ensure top-notch service for all our clients.</p>
+        <img src="{% static 'img/about.jpg' %}" alt="About Us" class="img-fluid shadow-lg rounded">
     </div>
 </section>
 
@@ -75,15 +85,15 @@
                 <form>
                     <div class="mb-3">
                         <label for="name" class="form-label">Your Name</label>
-                        <input type="text" class="form-control" id="name" placeholder="Enter your name">
+                        <input type="text" class="form-control" id="name" placeholder="Enter your name" required>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Your Email</label>
-                        <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
                     </div>
                     <div class="mb-3">
                         <label for="message" class="form-label">Message</label>
-                        <textarea class="form-control" id="message" rows="4" placeholder="Enter your message"></textarea>
+                        <textarea class="form-control" id="message" rows="4" placeholder="Enter your message" required></textarea>
                     </div>
                     <button type="submit" class="btn btn-success px-4 py-2">Send Message</button>
                 </form>
@@ -107,16 +117,89 @@
         overflow-x: hidden;
     }
 
-    /* Car Animation */
-    .car-animation {
-        animation: moveCar 10s linear infinite;
-        bottom: 0; /* Car is on the ground */
-        left: -150px; /* Start off-screen */
+    /* Background Slideshow */
+    .slideshow-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        animation: slideMove 15s infinite;
+        z-index: 1; /* Ensure it's below the overlay and content */
     }
 
-    @keyframes moveCar {
-        0% { left: -150px; } /* Start off-screen */
-        100% { left: 100%; } /* Move to the right off-screen */
+    .slide {
+        flex: 0 0 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: transform 1s ease-in-out;
+    }
+
+    @keyframes slideMove {
+        0% { transform: translateX(0%); }
+        33% { transform: translateX(-100%); }
+        66% { transform: translateX(-200%); }
+        100% { transform: translateX(0%); }
+    }
+
+    /* Overlay for better text visibility */
+    .position-absolute {
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 2; /* Higher than slideshow, lower than content */
+    }
+
+    /* Text and logo container styling */
+    .text-center {
+        position: relative; /* Ensures z-index works */
+        z-index: 3; /* Place above slideshow and overlay */
+    }
+
+    /* Logo container */
+    .logo-container {
+        position: relative;
+        z-index: 3;
+    }
+
+    .logo {
+        max-width: 120px;
+        margin: 0 auto;
+    }
+
+    /* Ensure text is always centered */
+    .display-4 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    /* Subheading Styling */
+    .lead {
+        font-size: 1.25rem;
+        color: #ddd;
+    }
+
+    /* Hover effects on feature cards */
+    .hover-shadow:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Styling for Contact Form Inputs */
+    .form-control {
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button Styling */
+    .btn-success {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Add subtle rounded corners to images */
+    .img-fluid {
+        border-radius: 0.5rem;
     }
 </style>
 {% endblock %}

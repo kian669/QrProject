@@ -99,8 +99,7 @@
             </div>
         </div>
     </div>
-
-   <!-- Modal for Employee Information -->
+<!-- Modal for Employee Information -->
 <div class="modal fade" id="employeeInfoModal" tabindex="-1" aria-labelledby="employeeInfoModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -127,10 +126,28 @@
                         <label for="employeeStatus" class="form-label">Status</label>
                         <input type="text" class="form-control" id="employeeStatus" name="employee_status" readonly>
                     </div>
+                    <div class="mb-3">
+                        <label for="employeeVehicleType" class="form-label">Vehicle Type</label>
+                        <select class="form-select" id="employeeVehicleType" name="employee_vehicle_type">
+                            <option selected>Choose...</option>
+                            <!-- Dynamic options will be added here -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employeeViolation" class="form-label">Violation</label>
+                        <select class="form-select" id="employeeViolation" name="employee_violation">
+                            <option selected>Choose...</option>
+                            <option value="Late Attendance">Late Attendance</option>
+                            <option value="Absence Without Leave">Absence Without Leave</option>
+                            <option value="Unauthorized Breaks">Unauthorized Breaks</option>
+                            <option value="Violation of Safety Rules">Violation of Safety Rules</option>
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitEmployeeViolationForm()">Submit</button>
             </div>
         </div>
     </div>
@@ -187,7 +204,29 @@
 
  
 <script>
-   
+
+    function populateEmployeeVehicleDropdown(vehicles) {
+        const vehicleSelect = document.getElementById('employeeVehicleType');
+        
+        // Clear previous options
+        vehicleSelect.innerHTML = '';
+    
+        // Add a default 'Choose...' option
+        const defaultOption = document.createElement('option');
+        defaultOption.text = 'Choose Vehicle';
+        defaultOption.value = '';
+        vehicleSelect.appendChild(defaultOption);
+    
+        // Iterate over vehicles array and add options to the dropdown
+        vehicles.forEach(function(vehicle) {
+            const option = document.createElement('option');
+            option.text = `${vehicle.vehicle_type} - ${vehicle.plate_number}`;
+            option.value = `${vehicle.vehicle_type} - ${vehicle.plate_number}`;
+            vehicleSelect.appendChild(option);
+        });
+    }
+    
+
 function populateVehicleDropdown(vehicles) {
     const vehicleSelect = document.getElementById('vehicleType');
     
@@ -208,6 +247,8 @@ function populateVehicleDropdown(vehicles) {
         vehicleSelect.appendChild(option);
     });
 }
+
+
     $(document).ready(function () {
             $('#violationsTable').DataTable({
                 "paging": true,        
@@ -243,6 +284,38 @@ function populateVehicleDropdown(vehicles) {
             })
             .catch(err => console.error(err));
         }
+
+    
+        function submitEmployeeViolationForm() {
+            // Get the form data
+            const form = document.getElementById('employeeInfoForm');
+            const formData = new FormData(form);
+        
+            // Send data to the server using Fetch API
+            fetch('/submit_employee_violation/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value, // Include CSRF token
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Violation submitted successfully!');
+                    // Close the modal after successful submission
+                    $('#employeeInfoModal').modal('hide');
+                } else {
+                    alert('There was an error submitting the violation.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting the violation.');
+            });
+        }
+        
+        
         
         const video = document.getElementById('video');
         const qrData = document.getElementById('qrData');
@@ -347,6 +420,7 @@ function populateVehicleDropdown(vehicles) {
                                 document.getElementById('employeeID').value = data.employee_id;
                                 document.getElementById('employeeContact').value = data.contact_number || '';
                                 document.getElementById('employeeStatus').value = data.status || '';
+                                populateEmployeeVehicleDropdown(data.vehicles);
                         
                                 // Check if modal is already active, hide if so
                                 const employeeInfoModal = bootstrap.Modal.getInstance(document.getElementById('employeeInfoModal'));
