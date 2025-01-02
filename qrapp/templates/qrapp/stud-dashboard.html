@@ -1,144 +1,51 @@
 {% extends 'qrapp/base.html' %}
-
 {% block content %}
-<div class="row">
-        {% if request.session.first_name and request.session.last_name %}
-    <h1>Hi, {{ request.session.first_name }} {{ request.session.last_name }}!</h1>
-{% endif %}
+<!-- Font Awesome CDN -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
-        <!-- Cards with modern design -->
-        <div class="col-12 col-sm-6 col-lg-4 mb-4">
-            <div class="card h-100 shadow-lg border-0 rounded-3" style="background: linear-gradient(135deg, #4e73df, #224abe); color: white;">
-                <div class="card-body">
-                    <h5 class="card-title display-6 fw-bold">Student Logs</h5>
-                    <p class="card-text fs-5">Total: <span class="fw-bold">150</span></p>
-                    <a href="#" class="btn btn-light btn-sm">View Details</a>
-                </div>
-            </div>
+<div class="container py-5">
+    <!-- Greeting Section -->
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center text-md-start">
+            <h1 class="display-4 fw-bold text-primary">Welcome, {{ request.session.first_name }} {{ request.session.last_name }}!</h1>
+            <p class="text-muted fs-5 mt-3">
+                We are thrilled to have you here. Explore opportunities and achieve your goals effortlessly.
+            </p>
         </div>
-        <div class="col-12 col-sm-6 col-lg-4 mb-4">
-            <div class="card h-100 shadow-lg border-0 rounded-3" style="background: linear-gradient(135deg, #f6c23e, #f1b31b); color: white;">
-                <div class="card-body">
-                    <h5 class="card-title display-6 fw-bold">Student Violations</h5>
-                    <p class="card-text fs-5">Reported: <span class="fw-bold">15</span></p>
-                    <p class="card-text fs-5">Resolved: <span class="fw-bold">10</span></p>
-                    <a href="#" class="btn btn-light btn-sm">View Details</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-4 mb-4">
-            <div class="card h-100 shadow-lg border-0 rounded-3" style="background: linear-gradient(135deg, #1cc88a, #17a673); color: white;">
-                <div class="card-body">
-                    <h5 class="card-title display-6 fw-bold">Vehicle Stats</h5>
-                    <p class="card-text fs-5">Cars: <span class="fw-bold">25</span></p>
-                    <p class="card-text fs-5">Motorcycles: <span class="fw-bold">15</span></p>
-                </div>
-            </div>
+        <div class="col-md-6 text-center">
+            <i class="fas fa-globe text-primary" style="font-size: 6rem;"></i>
         </div>
     </div>
 
-    <!-- Charts Row with clean and colorful card designs -->
-    <div class="row">
-        <div class="col-12 col-md-6 mb-4">
-            <div class="card h-100 shadow-lg border-0 rounded-3">
+    <!-- Features Section -->
+    <div class="row text-center mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow h-100">
                 <div class="card-body">
-                    <h5 class="card-title display-6 fw-bold">Monthly Registrations</h5>
-                    <div class="chart-container">
-                        <canvas id="registrationChart"></canvas>
-                    </div>
+                    <i class="fas fa-file-alt text-primary mb-3" style="font-size: 4rem;"></i>
+                    <h5 class="fw-bold text-primary">Comprehensive Resources</h5>
+                    <p class="text-muted small">Access a wide range of tools and guides designed to help you succeed.</p>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-6 mb-4">
-            <div class="card h-100 shadow-lg border-0 rounded-3">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow h-100">
                 <div class="card-body">
-                    <h5 class="card-title display-6 fw-bold">Violation Trends</h5>
-                    <div class="chart-container">
-                        <canvas id="violationChart"></canvas>
-                    </div>
+                    <i class="fas fa-users text-primary mb-3" style="font-size: 4rem;"></i>
+                    <h5 class="fw-bold text-primary">Vibrant Community</h5>
+                    <p class="text-muted small">Engage with like-minded individuals and foster meaningful connections.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow h-100">
+                <div class="card-body">
+                    <i class="fas fa-chart-line text-primary mb-3" style="font-size: 4rem;"></i>
+                    <h5 class="fw-bold text-primary">Continuous Growth</h5>
+                    <p class="text-muted small">Empower yourself with opportunities to learn and grow continuously.</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-// Sample Chart.js scripts
-const ctx1 = document.getElementById('registrationChart').getContext('2d');
-const registrationChart = new Chart(ctx1, {
-    type: 'bar',
-    data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-            label: 'Registrations',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {    
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Number of Registrations',
-                },
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Months',
-                },
-            }
-        },
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-        }
-    }
-});
-
-const ctx2 = document.getElementById('violationChart').getContext('2d');
-const violationChart = new Chart(ctx2, {
-    type: 'line',
-    data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-            label: 'Violations',
-            data: [5, 10, 3, 7, 5, 2],
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            fill: true,
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Number of Violations',
-                },
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Months',
-                },
-            }
-        },
-        plugins: {
-            legend: {
-                position: 'top',
-            },
-        }
-    }
-});
-</script>
 {% endblock %}

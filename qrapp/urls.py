@@ -10,8 +10,8 @@ from .views import submit_violation
 from .views import submit_employee_violation
 from .views import reject_student
 from . import views 
-from .views import approve_student, activate_student, unified_login
-
+from .views import approve_student, activate_student, unified_login, logs_analytics_data,employee_violations_analytics
+from .views import student_violations_analytics
 
 
 
@@ -58,6 +58,18 @@ urlpatterns = [
     path('employee-notifications/', views.employee_notifications, name='employee-notifications'),
     path('employee-pending/', views.employee_pending, name='employee-pending'),
     path('approve-employee/<int:pk>/', views.approve_pending_employee, name='approve-employee'), 
+    path('mobile-attendance-scan/', views.mobile_attendance_scanner, name='mobile-attendance-scan'), 
+    path('violations/', views.student_violations_view, name='student-violations'),
+    path('student-logs/', views.student_logs_view, name='student_logs_view'),
+    path('employee-violations/', views.employee_violations, name='employee-violations'),
+    path('employee-logs/', views.employee_logs_view, name='employee-logs'),
+    path('logs-analytics-data/', logs_analytics_data, name='logs_analytics_data'),
+    path('analytics-data/', views.analytics_data, name='analytics-data'),
+    path('student-violations-data/', student_violations_analytics, name='student_violations_data'),
+    path('employee-violations-analytics/', employee_violations_analytics, name='employee_violations_analytics'),
+    path('student-own-profile/', views.student_own_profile, name="student-own-profile"),
+     path('update-profile/', views.update_student_profile, name='update_student_profile'),
+    
 ]
 
 if settings.DEBUG:

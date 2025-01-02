@@ -55,11 +55,10 @@
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Total Sales</h5>
-                        <p class="card-text">$34,567</p>
-                        <!-- Chart for Total Sales -->
+                        <h5 class="card-title">Logs Analytics(Students/Employees)</h5>
+                        <p>Login and Logout Counts</p>
                         <div class="chart-container">
-                            <canvas id="totalSalesChart"></canvas>
+                            <canvas id="logsAnalyticsChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -68,7 +67,10 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">New Users</h5>
-                        <p class="card-text">1,234</p>
+                        <p class="card-text">
+                            Total Students: <span id="totalStudents">Loading...</span><br>
+                            Total Employees: <span id="totalEmployees">Loading...</span>
+                        </p>
                         <!-- Chart for New Users -->
                         <div class="chart-container">
                             <canvas id="newUsersChart"></canvas>
@@ -79,8 +81,9 @@
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Revenue</h5>
-                        <p class="card-text">$78,910</p>
+                        <h5 class="card-title">Violations</h5>
+                        <p class="card-text">Total Students Violation:<br> Total Employees Violaton:</p>
+                       
                         <!-- Chart for Revenue -->
                         <div class="chart-container">
                             <canvas id="revenueChart"></canvas>
@@ -92,24 +95,25 @@
 
         <!-- Detailed Analytics Section -->
         <div class="row">
+            <!-- Student Violations Chart -->
             <div class="col-lg-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Sales by Region</h5>
-                        <!-- Chart for Sales by Region -->
+                        <h5 class="card-title">Student Violations (Jan - Dec)</h5>
                         <div class="chart-container">
-                            <canvas id="salesByRegionChart"></canvas>
+                            <canvas id="studentViolationsChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Employee Violations Chart -->
             <div class="col-lg-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Monthly Trends</h5>
-                        <!-- Chart for Monthly Trends -->
+                        <h5 class="card-title">Employee Violations (Jan - Dec)</h5>
                         <div class="chart-container">
-                            <canvas id="monthlyTrendsChart"></canvas>
+                            <canvas id="employeeViolationsChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -156,114 +160,190 @@
     <script>
         // Example Chart.js setup
         document.addEventListener('DOMContentLoaded', function() {
-            const ctxTotalSales = document.getElementById('totalSalesChart').getContext('2d');
-            new Chart(ctxTotalSales, {
+            const ctx = document.getElementById('logsAnalyticsChart').getContext('2d');
+            const logsChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                    datasets: [{
-                        label: 'Total Sales',
-                        data: [10000, 20000, 15000, 30000, 25000],
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
+                    labels: ['Login', 'Logout'],
+                    datasets: [
+                        {
+                            label: 'Student Logs',
+                            data: [], // Placeholder
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Employee Logs',
+                            data: [], // Placeholder
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 1
+                        }
+                    ]
                 },
                 options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                    },
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
             });
-
-            const ctxNewUsers = document.getElementById('newUsersChart').getContext('2d');
-            new Chart(ctxNewUsers, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                    datasets: [{
-                        label: 'New Users',
-                        data: [50, 70, 90, 100, 120],
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                        fill: false
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
-            new Chart(ctxRevenue, {
-                type: 'pie',
-                data: {
-                    labels: ['Product A', 'Product B', 'Product C'],
-                    datasets: [{
-                        label: 'Revenue',
-                        data: [30000, 50000, 20000],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                }
-            });
-
-            const ctxSalesByRegion = document.getElementById('salesByRegionChart').getContext('2d');
-            new Chart(ctxSalesByRegion, {
-                type: 'doughnut',
-                data: {
-                    labels: ['North', 'South', 'East', 'West'],
-                    datasets: [{
-                        label: 'Sales by Region',
-                        data: [15000, 20000, 18000, 22000],
-                        backgroundColor: [
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(255, 159, 64, 0.2)',
-                            'rgba(255, 205, 86, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)',
-                            'rgba(255, 205, 86, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                }
-            });
-
-            const ctxMonthlyTrends = document.getElementById('monthlyTrendsChart').getContext('2d');
-            new Chart(ctxMonthlyTrends, {
-                type: 'radar',
-                data: {
-                    labels: ['January', 'February', 'March', 'April', 'May'],
-                    datasets: [{
-                        label: 'Monthly Trends',
-                        data: [50, 60, 70, 80, 90],
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
-                }
-            });
+    
+            // Fetch real-time logs data
+            fetch('/logs-analytics-data/')
+                .then(response => response.json())
+                .then(data => {
+                    logsChart.data.datasets[0].data = [
+                        data.students.login || 0,
+                        data.students.logout || 0,
+                    ];
+                    logsChart.data.datasets[1].data = [
+                        data.employees.login || 0,
+                        data.employees.logout || 0,
+                    ];
+                    logsChart.update();
+                });
         });
+        
+            const ctxNewUsers = document.getElementById('newUsersChart').getContext('2d');
+        
+            fetch('/analytics-data/')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalStudents').textContent = data.total_students;
+                    document.getElementById('totalEmployees').textContent = data.total_employees;
+                    new Chart(ctxNewUsers, {
+                        type: 'line',
+                        data: {
+                            labels: data.months,
+                            datasets: [
+                                {
+                                    label: 'New Students',
+                                    data: data.students,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1,
+                                    fill: true,
+                                },
+                                {
+                                    label: 'New Employees',
+                                    data: data.employees,
+                                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                    borderColor: 'rgba(255, 99, 132, 1)',
+                                    borderWidth: 1,
+                                    fill: true,
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: { position: 'top' },
+                            },
+                        }
+                    });
+                })
+                .catch(error => console.error('Error fetching analytics data:', error));
+        
+        const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctxRevenue, {
+            type: 'bar',
+            data: {
+                labels: ['Student Violations', 'Employee Violations'],
+                datasets: [{
+                    label: 'Violations',
+                    data: [5, 3], // Placeholder data (5 student violations, 3 employee violations)
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' },
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+        
+        const ctx = document.getElementById('studentViolationsChart').getContext('2d');
+
+  fetch('/student-violations-data/')
+    .then((response) => response.json())
+    .then((data) => {
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+          datasets: [{
+            label: 'Violations',
+            data: data.violations,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+          plugins: { legend: { position: 'top' } }
+        }
+      });
+    })
+    .catch((error) => console.error('Error fetching violations data:', error));
+  // Fetch employee violations data from the backend
+fetch('/employee-violations-analytics/')
+.then(response => response.json())
+.then(data => {
+    const ctxEmployeeViolations = document.getElementById('employeeViolationsChart').getContext('2d');
+
+    new Chart(ctxEmployeeViolations, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Employee Violations',
+                data: data.violations,  // Dynamic data from backend
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+})
+.catch(error => console.error('Error fetching data:', error));
+
     </script>
 </body>
 </html>

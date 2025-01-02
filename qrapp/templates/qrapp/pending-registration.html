@@ -91,15 +91,16 @@
   document.addEventListener('DOMContentLoaded', function () {
     // Initialize DataTable
     $('#registrationsTable').DataTable({
-      "autoWidth": false,
-      "columnDefs": [
-          { "width": "5%", "targets": 0 }, // For the counter column
-          { "width": "20%", "targets": 1 }, // Adjust other columns if needed
-          { "width": "20%", "targets": 2 },
-          { "width": "20%", "targets": 3 },
-          { "width": "35%", "targets": 4 }  // Actions column might need more width
-      ]
-    });
+        "autoWidth": true,  // Set to true instead of false
+        "columnDefs": [
+            { "width": "5%", "targets": 0 },  // For the counter column
+            { "width": "20%", "targets": 1 },  // Adjust other columns if needed
+            { "width": "20%", "targets": 2 },
+            { "width": "20%", "targets": 3 },
+            { "width": "35%", "targets": 4 }  // Actions column might need more width
+        ]
+      });
+      
   
     // Modal data population
     var studentModal = document.getElementById('studentModal');

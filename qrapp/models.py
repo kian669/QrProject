@@ -64,6 +64,8 @@ class StudentMasterList(models.Model):
         # license_upload = models.FileField(upload_to='uploads/license/')
         password = models.CharField(max_length=128, blank=True, null=False)
         qr_code = models.ImageField(upload_to='uploads/qr_codes/', blank=True, null=True)
+        created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
 
         def __str__(self):
             return f"{self.username} ({self.student_id})"
@@ -108,9 +110,7 @@ class Violation(models.Model):
 
     def __str__(self):
         return f"{self.username} - {self.violations} ({self.vehicle_type})"
-    
-
-    
+       
 class Logs(models.Model):
     LOG_TYPE_CHOICES = [
         ('login', 'Login'),
@@ -126,6 +126,7 @@ class Logs(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.log_type} at {self.log_time.strftime('%Y-%m-%d %H:%M:%S')}"
+
     
     
 class Vehicle(models.Model):
@@ -161,11 +162,10 @@ class EmployeeVehicle(models.Model):
     vehicle_type = models.CharField(max_length=50, choices=[('Car', 'Car'), ('Motorcycle', 'Motorcycle')])
     employee_id = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='vehicles')
     id = models.AutoField(primary_key=True)
+    
 
     def __str__(self):
         return f"{self.plate_number} ({self.vehicle_type}) - {self.employee_id.username}"
-
-
 
 class Employee(models.Model):
     STATUS_CHOICES = [
@@ -180,10 +180,26 @@ class Employee(models.Model):
     password = models.CharField(max_length=128)  # Password field
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     qr_code = models.ImageField(upload_to='qr_codes/', null=True, blank=True)  # Nullable QR code field
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
 
     def __str__(self):
         return self.full_name
     
+    
+class EmployeeLogs(models.Model):
+    LOG_TYPE_CHOICES = [
+        ('login', 'Login'),
+        ('logout', 'Logout'),
+    ]
+
+    employee = models.ForeignKey('Employee', on_delete=models.CASCADE, related_name='logs')
+    log_time = models.DateTimeField(default=timezone.now)  # Stores both date and time
+    log_type = models.CharField(max_length=10, choices=LOG_TYPE_CHOICES)
+
+    def __str__(self):
+        return f"{self.employee.full_name} - {self.log_type} at {self.log_time.strftime('%Y-%m-%d %H:%M:%S')}"
+
 
 class EmployeePendingRegistration(models.Model):
     STATUS_CHOICES = [

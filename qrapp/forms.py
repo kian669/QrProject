@@ -115,7 +115,7 @@ class StudentRegistrationForm(forms.ModelForm):
             }),
             'major': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Enter your major'
+                'placeholder': 'Enter your number'
             }),
             'password': forms.PasswordInput(attrs={
                 'class': 'form-control',

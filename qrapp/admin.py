@@ -4,7 +4,7 @@ from .models import Security
 from .models import Violation
 from .models import StudentMasterList
 from .models import Logs
-from .models import Vehicle, Employee, EmployeeVehicle,EmployeeViolation, EmployeeNotification,EmployeePendingRegistration
+from .models import Vehicle, Employee, EmployeeVehicle,EmployeeViolation, EmployeeNotification,EmployeePendingRegistration, EmployeeLogs
 # Register your models here.
 
 admin.site.register(Student)
@@ -18,3 +18,4 @@ admin.site.register(EmployeeVehicle)
 admin.site.register(EmployeeViolation)
 admin.site.register(EmployeeNotification)
 admin.site.register(EmployeePendingRegistration)
+admin.site.register(EmployeeLogs)

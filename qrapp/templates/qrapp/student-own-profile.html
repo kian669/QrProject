@@ -1,0 +1,388 @@
+{% extends 'qrapp/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <!-- Profile Container -->
+    <div class="profile-container mb-4">
+        <div class="row align-items-center">
+            <!-- Profile Picture with Background -->
+            <div class="col-md-3 text-center">
+                <div class="profile-pic-background rounded-3 shadow-lg p-2">
+                    <img src="{% static 'img/R.png' %}" alt="Profile Picture" class="img-fluid" style="width: 200px; height: 200px; object-fit: cover;">
+                </div>
+                <!-- Update Profile Button -->
+<button class="btn btn-primary mt-2 mb-3" data-bs-toggle="modal" data-bs-target="#updateProfileModal">
+    Update Profile
+</button>
+
+            </div>
+            <!-- Profile Details -->
+            <div class="col-md-6">
+                <h4 class="fw-bold mb-0">{{ student.username }}</h4>
+                <p class="text-muted small mb-0">Profile Overview</p>
+                <table class="table table-sm mb-0">
+                    <tbody>
+                        <tr class="profile-row">
+                            <td class="fw-bold" style="width: 150px;">
+                                <div class="icon-box"><i class="fas fa-user"></i></div> Full Name
+                            </td>
+                            <td class="text-muted">{{ student.first_name }} {{ student.last_name }}</td>
+                        </tr>
+                        <tr class="profile-row">
+                            <td class="fw-bold" style="width: 150px;">
+                                <div class="icon-box"><i class="fas fa-id-badge"></i></div> Student ID
+                            </td>
+                            <td class="text-muted">{{ student.student_id }}</td>
+                        </tr>
+                        <tr class="profile-row">
+                            <td class="fw-bold" style="width: 150px;">
+                                <div class="icon-box"><i class="fas fa-envelope"></i></div> Email
+                            </td>
+                            <td class="text-muted">{{ student.email }}</td>
+                        </tr>
+                        <tr class="profile-row">
+                            <td class="fw-bold" style="width: 150px;">
+                                <div class="icon-box"><i class="fas fa-university"></i></div> Course
+                            </td>
+                            <td class="text-muted">{{ student.course }}</td>
+                        </tr>
+                        <tr class="profile-row">
+                            <td class="fw-bold" style="width: 150px;">
+                                <div class="icon-box"><i class="fas fa-calendar-alt"></i></div> Year
+                            </td>
+                            <td class="text-muted">{{ student.year }}</td>
+                        </tr>
+                        <tr class="profile-row">
+                            <td class="fw-bold" style="width: 150px;">
+                                <div class="icon-box"><i class="fas fa-book"></i></div> Contact No.
+                            </td>
+                            <td class="text-muted">{{ student.major }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>    <!-- QR Code Display -->
+            <div class="col-md-3">
+                <h5 class="fw-bold text-center ">Your QR Code</h5>
+                <div class="qr-code-container text-center">
+                    {% if student.qr_code %}
+                        <img src="{{ student.qr_code.url }}" alt="QR Code" class="img-fluid" style="width: 200px; height: 200px; object-fit: cover;">
+                        <br><br>
+                        <a href="{{ student.qr_code.url }}" class="btn btn-primary" download>Download QR Code</a>
+                    {% else %}
+                        <p class="text-muted">No QR Code available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Modal for Image View -->
+<div class="modal fade" id="vehicleModal" tabindex="-1" aria-labelledby="vehicleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md"> <!-- Changed this line to modal-md for medium size -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="vehicleModalLabel">Vehicle Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="Vehicle Document" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Profile Modal -->
+<div class="modal fade" id="updateProfileModal" tabindex="-1" aria-labelledby="updateProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateProfileModalLabel">Update Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'update_student_profile' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="firstName" name="first_name" value="{{ student.first_name }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="lastName" name="last_name" value="{{ student.last_name }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ student.email }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="course" class="form-label">Course</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
+                            <input type="text" class="form-control" id="course" name="course" value="{{ student.course }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="year" class="form-label">Year</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                            <input type="text" class="form-control" id="year" name="year" value="{{ student.year }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="major" class="form-label">Major</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-book"></i></span>
+                            <input type="text" class="form-control" id="major" name="major" value="{{ student.major }}">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Tabs Section -->
+    <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab" aria-controls="posts" aria-selected="true">My Vehicles</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="reels-tab" data-bs-toggle="tab" data-bs-target="#reels" type="button" role="tab" aria-controls="reels" aria-selected="false">My Logs</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tagged-tab" data-bs-toggle="tab" data-bs-target="#tagged" type="button" role="tab" aria-controls="tagged" aria-selected="false">My Violations</button>
+        </li>
+    </ul>
+
+   <!-- Tab Content -->
+   <div class="tab-content" id="profileTabContent">
+        
+    <!-- My Vehicles Tab -->
+    <div class="tab-pane fade show active" id="posts" role="tabpanel" aria-labelledby="posts-tab">
+        <table id="vehiclesTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Plate Number</th>
+                    <th>Plate Type</th>
+                    <th>Vehicle Type</th>
+                    <th>OR Upload</th>
+                    <th>CR Upload</th>
+                    <th>License Upload</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                <tr>
+                    <td>{{ vehicle.plate_number }}</td>
+                    <td>{{ vehicle.get_plate_type_display }}</td>
+                    <td>{{ vehicle.vehicle_type }}</td>
+                    <td>
+                        <a href="#" class="view-image" data-bs-toggle="modal" data-bs-target="#vehicleModal" data-image="{{ vehicle.or_upload.url }}">View</a>
+                    </td>
+                    <td>
+                        <a href="#" class="view-image" data-bs-toggle="modal" data-bs-target="#vehicleModal" data-image="{{ vehicle.cr_upload.url }}">View</a>
+                    </td>
+                    <td>
+                        <a href="#" class="view-image" data-bs-toggle="modal" data-bs-target="#vehicleModal" data-image="{{ vehicle.license_upload.url }}">View</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No vehicles found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- My Logs Tab -->
+    <div class="tab-pane fade" id="reels" role="tabpanel" aria-labelledby="reels-tab">
+        <table id="logsTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Log Type</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Course</th>
+                    <th>Log Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.get_log_type_display }}</td>
+                    <td>{{ log.first_name }}</td>
+                    <td>{{ log.last_name }}</td>
+                    <td>{{ log.course }}</td>
+                    <td>{{ log.log_time|date:"Y-m-d H:i:s" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- My Violations Tab -->
+    <div class="tab-pane fade" id="tagged" role="tabpanel" aria-labelledby="tagged-tab">
+        <h5 class="fw-bold mb-3">My Violations</h5>
+        <table id="violationsTable" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Violation</th>
+                    <th>Vehicle Type</th>
+                    <th>Date</th>
+                    <th>Offense Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for violation in violations %}
+                <tr>
+                    <td>{{ violation.violations }}</td>
+                    <td>{{ violation.vehicle_type }}</td>
+                    <td>{{ violation.date_created|date:"b. d, Y" }}</td>
+                    <td>{{ violation.offense_count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No violations found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<!-- Add Bootstrap CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Add jQuery and DataTables CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+<script>
+    $(document).ready(function() {
+        // Initialize DataTables for each table only if they have data
+        $('#vehiclesTable, #logsTable, #violationsTable').each(function() {
+            const noDataMessages = ["No vehicles found.", "No logs found.", "No violations found."];
+        
+            // Check if the table has any data rows other than the no-data messages
+            const firstCellText = $(this).find('tbody tr td').first().text().trim();
+        
+            if ($(this).find('tbody tr').length > 0 && !noDataMessages.includes(firstCellText)) {
+                $(this).DataTable({
+                    "paging": true,
+                    "searching": true,
+                    "lengthMenu": [5, 10, 15, 20],
+                });
+            }
+        });
+        
+
+        $('#vehicleModal').on('show.bs.modal', function (event) {
+            var link = $(event.relatedTarget); // Button that triggered the modal
+            var imageUrl = link.data('image'); // Extract image URL from data-attribute
+            var modalImage = $('#modalImage'); // Find the image element inside the modal
+            modalImage.attr('src', imageUrl); // Set the image source to the clicked link's data
+        });
+    });
+</script>
+
+<style>
+    .icon-box {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 35px;
+        height: 35px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        margin-right: 10px;
+        font-size: 18px;
+        color: #506BB4;
+    }
+
+    table td {
+        padding: 5px 10px;
+    }
+
+    .profile-container {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .profile-pic-background {
+        background-color: #ffffff;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        width: fit-content;
+        margin: 0 auto;
+    }
+
+    /* Media query for mobile view */
+    @media (max-width: 767px) {
+        .profile-container {
+            padding: 10px; /* Add some padding for mobile view */
+        }
+    
+        /* Making table horizontally scrollable on mobile */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+        }
+    
+        table {
+            width: 100%;
+            table-layout: auto; /* Allow table cells to adapt to content */
+        }
+    
+        /* Ensuring the rows extend full width with background */
+        .profile-row {
+            display: block; /* Stack the label and value vertically */
+            background-color: white; /* Ensure background color is applied to the entire row */
+            padding: 10px; /* Optional: Add some padding for spacing */
+     
+            border-radius: 5px; /* Optional: for rounded corners */
+        }
+    
+        .profile-row td {
+            display: block; /* Make each cell behave like a block element */
+            width: 100%; /* Make sure cells take up full width */
+        }
+    
+        .profile-row td:first-child {
+            font-weight: bold;
+             /* Space between label and value */
+        }
+    
+        .profile-row td:last-child {
+            font-weight: normal;
+        }
+    
+        /* Optionally, adjust the font size for better fit on small screens */
+        .profile-row td {
+            font-size: 14px; /* Slightly reduce font size for better fit */
+        }
+    }
+</style>
+
+{% endblock %}

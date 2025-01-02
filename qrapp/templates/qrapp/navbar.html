@@ -36,13 +36,13 @@
                 </span>
                 <span class="title">Dashboard</span>
             </a>
-        </li>
+        </li> 
         <li>
             <a href="{% url 'pending-registration' %}">
                 <span class="icon">
                     <ion-icon name="hourglass-outline"></ion-icon>
                 </span>
-                <span class="title">Pending Registration</span>
+                <span class="title">Stud. Pending Accounts</span>
             </a>
         </li>
         <li>
@@ -215,7 +215,7 @@
             </a>
         </li>
         <li>
-            <a href="{% url 'attendance-scanner' %}">
+            <a href="{% url 'mobile-attendance-scan' %}">
                 <span class="icon">
                     <ion-icon name="id-card-outline"></ion-icon>
                 </span>
@@ -227,7 +227,7 @@
                 <span class="icon">
                     <ion-icon name="chatbubble-outline"></ion-icon>
                 </span>
-                <span class="title">View Profile</span>
+                <span class="title">My Profile</span>
             </a>
         </li>
        
@@ -343,11 +343,27 @@
             </a>
         </li>
         <li>
-            <a href="#">
+            <a href="{% url 'student-own-profile' %}">
                 <span class="icon">
                     <ion-icon name="chatbubble-outline"></ion-icon>
                 </span>
-                <span class="title">View Profile</span>
+                <span class="title">My Profile</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'student-violations' %}">
+                <span class="icon">
+                    <ion-icon name="warning-outline"></ion-icon>
+                </span>
+                <span class="title">My Violations</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'student_logs_view' %}">
+                <span class="icon">
+                    <ion-icon name="log-in-outline"></ion-icon>
+                </span>
+                <span class="title">My Logs</span>
             </a>
         </li>
        
@@ -469,6 +485,23 @@
                     <ion-icon name="notifications-outline"></ion-icon>
                 </span>
                 <span class="title">Notifications</span>
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'employee-violations' %}">
+                <span class="icon">
+                    <ion-icon name="warning-outline"></ion-icon>
+                </span>
+                <span class="title">Your Violations</span>
+            </a>
+        </li>
+      
+        <li>
+            <a href="{% url 'employee-logs' %}">
+                <span class="icon">
+                    <ion-icon name="log-in-outline"></ion-icon>
+                </span>
+                <span class="title">Your Logs</span>
             </a>
         </li>
       
@@ -753,7 +786,7 @@
 <body>
     <header id="topbar">
         <div class="logo-container">
-            <a href="{% url '' %}" class="topbar-logo">VEHICLE MONITORING</a>
+            <a href="{% url '' %}" class="topbar-logo">VEHICLE MONITORING SYSTEM</a>
         </div>
         <nav class="topbar-nav">
             <ul class="nav-links">

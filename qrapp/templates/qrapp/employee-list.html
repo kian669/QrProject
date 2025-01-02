@@ -78,21 +78,25 @@
             </div>
         </div>
 
-        <!-- QR Code Modal -->
-        <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="qrModalLabel">QR Code</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <img id="qrModalImage" src="" alt="QR Code" style="max-width: 100%; height: auto;">
-                    </div>
+     <!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrModalLabel">QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrModalImage" src="" alt="QR Code" style="max-width: 100%; height: auto;">
+                <div class="mt-3">
+                    <a id="downloadQrCode" class="btn btn-primary" download="qr_code.png">
+                        Download QR Code
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
     <script>
         $(document).ready(function () {
@@ -108,9 +112,12 @@
                 $('.qr-thumbnail').off('click').on('click', function () {
                     const qrUrl = $(this).data('qr-url');
                     $('#qrModalImage').attr('src', qrUrl);
+        
+                    // Update download button with QR code URL
+                    $('#downloadQrCode').attr('href', qrUrl);
                 });
             }
-    
+        
             // Initial attachment of click handler
             attachThumbnailClickHandler();
     

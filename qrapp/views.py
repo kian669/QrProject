@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from .models import Student, StudentMasterList, Security, Violation,Logs, Vehicle
+from .models import Student, StudentMasterList, Security, Violation,Logs, Vehicle, EmployeeLogs
 from .forms import StudentRegistrationForm  # Create this form separately
 from django.contrib import messages
 from datetime import datetime
@@ -13,6 +13,7 @@ from django.core.files.base import ContentFile
 from django.http import JsonResponse
 import qrcode
 import base64
+from django.db import IntegrityError
 from io import BytesIO
 import cv2
 from PIL import Image
@@ -38,6 +39,51 @@ from .forms import VehicleForm
 from datetime import timedelta
 from django.contrib.auth.models import User
 from .models import Employee,EmployeeVehicle, EmployeeViolation,EmployeeNotification,EmployeePendingRegistration
+from django.utils.timezone import now
+from django.db.models import Count,functions
+
+def employee_logs_view(request):
+        employee_id = request.session.get('employee_id')
+        logs = EmployeeLogs.objects.filter(employee_id=employee_id)
+        return render(request, 'qrapp/employee_logs.html', {'logs': logs})
+
+def employee_violations(request):
+   
+        employee_id = request.session.get('employee_id')  # Retrieve employee ID from session
+       # Get the employee instance
+
+        # Retrieve all violations associated with the logged-in employee
+        violations = EmployeeViolation.objects.filter(employee_id = employee_id)
+
+        return render(request, 'qrapp/employee-own-violations.html', {
+            'violations': violations
+        })
+
+        
+        
+def student_logs_view(request):
+ 
+    # Get the student_id from the session
+    student_id = request.session.get('student_id')
+
+    # Query the logs for the logged-in student
+    student_logs = Logs.objects.filter(student_id=student_id)
+
+    # Pass the logs to the template
+    return render(request, 'qrapp/student-own-logs.html', {'student_logs': student_logs})
+
+
+def student_violations_view(request):
+    # Get the logged-in student's username from the session
+    student_id = request.session.get('student_id')
+    
+    # Filter violations for the logged-in student
+    violations = Violation.objects.filter(student_id=student_id)
+
+    context = {
+        'violations': violations,
+    }
+    return render(request, 'qrapp/student-own-violations.html', context)
 
 def employee_notifications(request):
     # Get the logged-in employee's ID from the session
@@ -382,6 +428,43 @@ def home(request):
     
     return render(request, 'qrapp/index.html')
 
+
+def student_own_profile(request):
+    student_id = request.session.get('student_id')
+    if not student_id:
+        # Redirect or handle the case where the student_id is not in session
+        return redirect('unified-login')  # Adjust the URL name as per your project
+
+    # Retrieve the student's data
+    student = get_object_or_404(StudentMasterList, student_id=student_id)
+    
+    vehicles = Vehicle.objects.filter(student_id=student)
+    
+    logs = Logs.objects.filter(student_id=student_id).order_by('-log_time')
+    
+    violations = Violation.objects.filter(student_id=student_id)
+
+    return render(request, 'qrapp/student-own-profile.html', {'student': student, 'vehicles': vehicles,  'logs': logs , 'violations': violations})
+
+
+def update_student_profile(request):
+    if request.method == 'POST':
+        student_id = request.session.get('student_id')
+        student = get_object_or_404(StudentMasterList, student_id=student_id)
+        
+        student.first_name = request.POST.get('first_name', student.first_name)
+        student.last_name = request.POST.get('last_name', student.last_name)
+        student.email = request.POST.get('email', student.email)
+        student.course = request.POST.get('course', student.course)
+        student.year = request.POST.get('year', student.year)
+        student.major = request.POST.get('major', student.major)
+        student.save()
+
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('student-own-profile')  # Adjust the URL name as needed
+
+    return redirect('student-own-profile')  # Redirect if not POST
+
 def login_stud(request):
     
     if request.user.is_authenticated:
@@ -421,15 +504,46 @@ def register_stud(request):
     if request.method == 'POST':
         form = StudentRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            student = form.save(commit=False)
-       
-            student.save()
-            messages.success(request, 'Registration successful!')
-            return redirect('unified-login')
+            try:
+                # Check if email already exists in the database
+                if StudentMasterList.objects.filter(email=form.cleaned_data['email']).exists():
+                    messages.error(request, "This email is already registered. Please use a different one.")
+                    return render(request, 'qrapp/register.html', {'form': form})
+
+                # Create student if the email is unique
+                student_master = StudentMasterList(
+                    student_id=form.cleaned_data['student_id'],
+                    username=form.cleaned_data['username'],
+                    first_name=form.cleaned_data['first_name'],
+                    last_name=form.cleaned_data['last_name'],
+                    email=form.cleaned_data['email'],
+                    course=form.cleaned_data['course'],
+                    year=form.cleaned_data['year'],
+                    major=form.cleaned_data['major'],
+                )
+                # Hash and save the password
+                student_master.set_password(form.cleaned_data['password'])
+                
+                # Generate QR code
+                qr_data = f"{student_master.student_id}"
+                qr_image = qrcode.make(qr_data)
+                buffer = BytesIO()
+                qr_image.save(buffer, format='PNG')
+                qr_code_file = ContentFile(buffer.getvalue(), name=f"{student_master.student_id}_qr.png")
+                student_master.qr_code.save(f"{student_master.student_id}_qr.png", qr_code_file)
+
+                # Save student record
+                student_master.save()
+
+                messages.success(request, "Registration successful. You can now log in.")
+                return redirect('unified-login')  # Redirect to login page after registration
+            except IntegrityError:
+                messages.error(request, "There was an error during registration. Please try again.")
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, "There was an error with your registration. Please check the form.")
     else:
         form = StudentRegistrationForm()
+
     return render(request, 'qrapp/register.html', {'form': form})
 
 def dashboard(request):
@@ -454,6 +568,82 @@ def head_login(request):
 
 def head_dashboard(request):
     return render(request, 'qrapp/head-dashboard.html')
+
+def student_violations_analytics(request):
+    violations_by_month = (
+        Violation.objects.annotate(month=functions.ExtractMonth('date_created'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    data = {month: 0 for month in range(1, 13)}  # Initialize months with 0
+    for entry in violations_by_month:
+        data[entry['month']] = entry['count']
+
+    return JsonResponse({'months': list(data.keys()), 'violations': list(data.values())})
+
+
+def employee_violations_analytics(request):
+    violations_by_month = (
+        EmployeeViolation.objects.annotate(month=functions.ExtractMonth('date_created'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    data = {month: 0 for month in range(1, 13)}  # Initialize months with 0
+    for entry in violations_by_month:
+        data[entry['month']] = entry['count']
+
+    return JsonResponse({'months': list(data.keys()), 'violations': list(data.values())})
+
+
+def analytics_data(request):
+    # Calculate new users in the last 5 months
+    today = datetime.now()
+    months = [(today - timedelta(days=30 * i)).strftime("%b") for i in range(4, -1, -1)]
+      # Calculate total students and employees
+    total_students = StudentMasterList.objects.count()
+    total_employees = Employee.objects.count()
+
+    student_counts = [
+        StudentMasterList.objects.filter(
+            created_at__year=(today - timedelta(days=30 * i)).year,
+            created_at__month=(today - timedelta(days=30 * i)).month
+        ).count()
+        for i in range(4, -1, -1)
+    ]
+    
+    employee_counts = [
+        Employee.objects.filter(
+            created_at__year=(today - timedelta(days=30 * i)).year,
+            created_at__month=(today - timedelta(days=30 * i)).month
+        ).count()
+        for i in range(4, -1, -1)
+    ]
+    
+    return JsonResponse({
+        'months': months,
+        'students': student_counts,
+        'employees': employee_counts,
+        'total_students': total_students,
+        'total_employees': total_employees,
+    })
+
+def logs_analytics_data(request):
+    # Aggregate logs data
+    student_logs = Logs.objects.values('log_type').annotate(count=Count('log_type'))
+    employee_logs = EmployeeLogs.objects.values('log_type').annotate(count=Count('log_type'))
+    
+    student_data = {log['log_type']: log['count'] for log in student_logs}
+    employee_data = {log['log_type']: log['count'] for log in employee_logs}
+
+    data = {
+        'students': student_data,
+        'employees': employee_data,
+    }
+    return JsonResponse(data)
 
 def student_list(request):
     # Fetch all students from the StudentMasterList model
@@ -656,7 +846,7 @@ def scan_qr_code(request):
         if qr_code_data:
             try:
                 # Check if the QR code data is numeric (student ID or employee ID)
-                if qr_code_data.isnumeric():
+                if qr_code_data:
                     # Try fetching student first
                     print(f"QR Code Data: {qr_code_data}") 
                     try:
@@ -735,8 +925,7 @@ def scan_student_qr_code(request):
         image_data = request.FILES.get('frame')
         if not image_data:
             return JsonResponse({'success': False, 'message': 'No image data found'})
-        
-        
+
         # Convert image data for OpenCV processing
         file_bytes = np.frombuffer(image_data.read(), np.uint8)
         img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
@@ -750,48 +939,95 @@ def scan_student_qr_code(request):
 
         # Detect and decode QR code
         qr_detector = cv2.QRCodeDetector()
-        # Simplified image processing
         qr_code_data, points, _ = qr_detector.detectAndDecode(resized_img)
 
-
         if qr_code_data:
+            print(f"Detected QR Code Data: {qr_code_data}")  # Print the QR code data
             try:
-                if qr_code_data:
-                    student = StudentMasterList.objects.get(student_id=qr_code_data)
+                # Check if QR code belongs to a student
+                student = StudentMasterList.objects.get(student_id=qr_code_data)
 
-                    # Get the latest log entry for the student
-                    last_log = Logs.objects.filter(student_id=student.student_id).order_by('-log_time').first()
+                # Get the latest log entry for the student
+                last_log = Logs.objects.filter(student_id=student.student_id).order_by('-log_time').first()
 
-                    # Only create a new log entry if the last state was different
+                # Determine log type for the student
+                if last_log is None or last_log.log_type == 'logout':
+                    log_type = 'login'
+                elif last_log.log_type == 'login':
+                    log_type = 'logout'
+
+                # Set interval delay (e.g., 7 seconds)
+                interval_delay = timezone.timedelta(seconds=7)
+                recent_log_exists = (
+                    last_log and last_log.log_time >= timezone.now() - interval_delay
+                )
+
+                if not recent_log_exists:
+                    # Create and save the student log entry
+                    log_entry = Logs(
+                        student_id=student.student_id,
+                        first_name=student.first_name,
+                        last_name=student.last_name,
+                        course=student.course,
+                        log_time=timezone.now(),
+                        log_type=log_type
+                    )
+                    log_entry.save()
+
+                    return JsonResponse({
+                        'success': True,
+                        'student': {
+                            'student_id': student.student_id,
+                            'username': student.username,
+                            'first_name': student.first_name,
+                            'last_name': student.last_name,
+                            'course': student.course,
+                            'log_type': log_type,
+                            'log_time': log_entry.log_time.strftime('%Y-%m-%d %H:%M:%S'),
+                        },
+                    })
+                else:
+                    return JsonResponse({'success': False, 'message': 'Please wait for a few seconds before the next scan.'})
+
+            except StudentMasterList.DoesNotExist:
+                try:
+                    # Check if QR code belongs to an employee
+                    employee = Employee.objects.get(id=qr_code_data)
+                    
+                    print(f"Employee QR Data Detected: {qr_code_data}")
+                    print(f"Employee Full Name: {employee.full_name}")
+                    print(f"Employee Status: {employee.status}")
+                    # Get the latest log entry for the employee
+                    last_log = EmployeeLogs.objects.filter(employee=employee).order_by('-log_time').first()
+
+                    # Determine log type for the employee
                     if last_log is None or last_log.log_type == 'logout':
                         log_type = 'login'
                     elif last_log.log_type == 'login':
                         log_type = 'logout'
 
-                    # Set interval delay (e.g., 5 seconds)
+                    # Set interval delay (e.g., 7 seconds)
                     interval_delay = timezone.timedelta(seconds=7)
                     recent_log_exists = (
                         last_log and last_log.log_time >= timezone.now() - interval_delay
                     )
 
                     if not recent_log_exists:
-                        # Create and save the log entry
-                        log_entry = Logs(
-                            student_id=student.student_id,
-                            first_name=student.first_name,
-                            last_name=student.last_name,
-                            course=student.course,
+                        # Create and save the employee log entry
+                        log_entry = EmployeeLogs(
+                            employee=employee,
                             log_time=timezone.now(),
                             log_type=log_type
                         )
                         log_entry.save()
-
                         return JsonResponse({
                             'success': True,
-                            'student': {
-                                'student_id': student.student_id,
-                                'username': student.username,
-                                'course': student.course,
+                            'employee': {
+                                'id': employee.id,
+                                'full_name': employee.full_name,
+                                'username': employee.username,
+                                'contact_number': employee.contact_number,
+                                'status': employee.status,
                                 'log_type': log_type,
                                 'log_time': log_entry.log_time.strftime('%Y-%m-%d %H:%M:%S'),
                             },
@@ -799,15 +1035,18 @@ def scan_student_qr_code(request):
                     else:
                         return JsonResponse({'success': False, 'message': 'Please wait for a few seconds before the next scan.'})
 
-                else:
-                    return JsonResponse({'success': False, 'message': 'Invalid QR code data'})
-            except StudentMasterList.DoesNotExist:
-                  return JsonResponse({
-                    "success": False,
-                    "qr_detected": True
-                })  # QR detected but no match
+                except Employee.DoesNotExist:
+                    return JsonResponse({
+                        "success": False,
+                        "qr_detected": True,
+                        "message": "QR code does not match any student or employee"
+                    })  # QR detected but no match
 
         return JsonResponse({'success': False, 'message': 'QR code not detected'})
+
+    
+def mobile_attendance_scanner(request):
+    return render(request, 'qrapp/mobile-attendance-scanner.html')
     
 def student_logs(request):
     logs = Logs.objects.all()
@@ -918,3 +1157,5 @@ def add_vehicle(request):
             messages.error(request, "Please correct the errors below.")
     
     return render(request, 'qrapp/add_vehicle.html', {'form': form})
+
+

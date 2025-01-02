@@ -1,0 +1,302 @@
+    {% load static %}
+    {% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>QR Code Scanner</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+        <style>
+            body {
+                background-color: #f4f4f4;
+            }
+
+            #qr-scanner-container {
+                position: relative;
+                height: 300px;
+                background-color: rgba(0, 0, 0, 0.7);
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            #qr-scanner-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1;
+            }
+
+            .corner {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                border: 4px solid #fff;
+                z-index: 2;
+            }
+
+            .corner.top-left {
+                top: 20%;
+                left: 20%;
+                border-right: none;
+                border-bottom: none;
+            }
+
+            .corner.top-right {
+                top: 20%;
+                right: 20%;
+                border-left: none;
+                border-bottom: none;
+            }
+
+            .corner.bottom-left {
+                bottom: 20%;
+                left: 20%;
+                border-right: none;
+                border-top: none;
+            }
+
+            .corner.bottom-right {
+                bottom: 20%;
+                right: 20%;
+                border-left: none;
+                border-top: none;
+            }
+
+            #qr-scanner {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                z-index: 0;
+            }
+        </style>
+    </head>
+    <body class="bg-light d-flex justify-content-center align-items-center vh-100">
+        <div class="card shadow-lg" style="width: 100%; max-width: 400px;">
+            <div class="card-body text-center">
+                <h1 class="h5 mb-3 text-primary">Student QR Code Scanner</h1>
+                <p class="text-muted">Scan your QR code to log in or out.</p>
+
+                <!-- QR Scanner Video -->
+                <div id="qr-scanner-container" class="mb-3">
+                    <video id="qr-scanner"></video>
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+                </div>
+
+                <!-- Status Output -->
+                <div id="scanner-output" class="mb-3 text-secondary">
+                    Position the QR code within the frame.
+                </div>
+
+                <!-- Display Student Information -->
+                <div id="student-info" class="mb-3">
+                    <!-- The student information will be displayed here after scanning -->
+                </div>
+
+                            <!-- Display Employee Information -->
+                <div id="employee-info" class="mb-3">
+                    <!-- The employee information will be displayed here after scanning -->
+                </div>
+
+
+                <p class="text-muted small">Powered by OpenCV and Django</p>
+            </div>
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/howler"></script>
+        <script>
+            var beep = new Howl({
+                src: ['{% static "beep.mp3" %}']  // Reference the beep sound using Django's static tag
+            });
+            var getout = new Howl({
+                src: ['{% static "getout.mp3" %}']  // Reference the beep sound using Django's static tag
+            });
+            const video = document.getElementById('qr-scanner');
+            const output = document.getElementById('scanner-output');
+            const studentInfo = document.getElementById('student-info');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d', { willReadFrequently: true });
+        
+            let scanningEnabled = true; // Control scanning state
+            let lastScannedQRCode = null; // Store the last scanned QR code
+            let lastScannedTime = 0; // Store the timestamp of the last scan
+        
+            // Initialize QR Scanner Video Feed
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                    .then((stream) => {
+                        video.srcObject = stream;
+                        video.play();
+        
+                        video.addEventListener('loadedmetadata', () => {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                        });
+        
+                        video.addEventListener('play', () => {
+                            setInterval(() => {
+                                if (!video.paused && !video.ended && scanningEnabled) {
+                                    processVideoFrame();
+                                }
+                            }, 80); // Process every 80ms
+                        });
+                    })
+                    .catch((error) => {
+                        output.textContent = "Error accessing camera: " + error.message;
+                    });
+            }
+        
+            // Process Video Frames for QR Detection
+    function processVideoFrame() {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Use a library like `jsQR`
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const qrCode = jsQR(imageData.data, canvas.width, canvas.height, { inversionAttempts: "attemptBoth" });
+
+        if (qrCode && qrCode.data){
+            const currentTime = Date.now();
+            const isSameQRCode = qrCode.data === lastScannedQRCode;
+
+            // Delay logic: 10s for the same QR code, 1.5s for different QR codes
+            if (isSameQRCode && currentTime - lastScannedTime < 10000) {
+                output.innerHTML = `<span class="text-warning">Same QR code detected. Please wait...</span>`;
+                return;
+            }
+
+            if (!isSameQRCode && currentTime - lastScannedTime < 1500) {
+                output.innerHTML = `<span class="text-warning">Processing. Please wait...</span>`;
+                return;
+            }
+
+            // Update last scanned data
+            lastScannedQRCode = qrCode.data;
+            lastScannedTime = currentTime;
+
+            scanningEnabled = false; // Disable further scans temporarily
+            output.innerHTML = `<span class="text-success">QR Code detected! Processing...</span>`;
+
+            
+            // Enhance detection (e.g., preprocessing for contrast)
+            enhanceFrameDetection(imageData);
+
+            canvas.toBlob((blob) => {
+                const formData = new FormData();
+                formData.append('frame', blob, 'qr_frame.png');
+
+                fetch(`/scan-student-qr/`, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Clear both sections initially
+                            studentInfo.innerHTML = '';
+                            const employeeInfo = document.getElementById('employee-info');
+                            employeeInfo.innerHTML = '';
+                
+                            if (data.student) {
+                                // Display student info
+                                studentInfo.innerHTML = `
+                                    <p><strong>Name:</strong> ${data.student.first_name} ${data.student.last_name}</p>
+                                    <p><strong>Log Type:</strong> ${data.student.log_type}</p>
+                                    <p><strong>Log Time:</strong> ${data.student.log_time}</p>
+                                `;
+                                employeeInfo.innerHTML = ''; // Clear employee info if student info is displayed
+                            }
+                
+                            if (data.employee) {
+                                // Display employee info
+                                employeeInfo.innerHTML = `
+                                    <p><strong>Name:</strong> ${data.employee.full_name}</p>
+                                    <p><strong>Log Type:</strong> ${data.employee.log_type}</p>
+                                    <p><strong>Log Time:</strong> ${data.employee.log_time}</p>
+                                `;
+                                studentInfo.innerHTML = ''; // Clear student info if employee info is displayed
+                            }
+                
+                            // Show success toast
+                            Toastify({
+                                text: `QR Code scanned successfully`,
+                                style: { background: "green" },
+                                duration: 3000
+                            }).showToast();
+                            beep.play();
+                        } else {
+                            showError(data.message || 'QR code does not match any student or employee');
+                            getout.play();
+                        }
+                    })
+                    .catch(err => {
+                        // Catch errors, including invalid JSON
+                        showError('QR code does not match any student or employee');
+                        getout.play();
+                    })
+                    .finally(() => {
+                        // Re-enable scanning after appropriate delay
+                        setTimeout(() => {
+                            scanningEnabled = true;
+                            output.textContent = "Position the QR code within the frame.";
+                        }, isSameQRCode ? 2000 : 2000); // Delay based on QR code type
+                    });
+                
+                
+            });
+        }
+    }
+
+    function enhanceFrameDetection(imageData) {
+        // Grayscale conversion
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            const avg = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+            imageData.data[i] = avg; // Red
+            imageData.data[i + 1] = avg; // Green
+            imageData.data[i + 2] = avg; // Blue
+        }
+    
+        // Apply adaptive histogram equalization for brightness balancing
+        let min = 255, max = 0;
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            min = Math.min(min, imageData.data[i]);
+            max = Math.max(max, imageData.data[i]);
+        }
+        const range = max - min || 1; // Avoid division by zero
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            imageData.data[i] = ((imageData.data[i] - min) / range) * 255;
+            imageData.data[i + 1] = ((imageData.data[i + 1] - min) / range) * 255;
+            imageData.data[i + 2] = ((imageData.data[i + 2] - min) / range) * 255;
+        }
+    }
+    
+
+        
+            function showError(message) {
+                output.innerHTML = `<span class="text-danger">${message}</span>`;
+                Toastify({
+                    text: `Error: ${message}`,
+                    style: { background: "red" },
+                    duration: 3000
+                }).showToast();
+            }
+        </script>
+        
+    </body>
+    </html>
+    {% endblock %}
