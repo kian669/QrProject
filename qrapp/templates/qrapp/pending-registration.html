@@ -30,7 +30,8 @@
                        data-or-upload="{{ registration.or_upload.url }}" data-cr-upload="{{ registration.cr_upload.url }}"
                        data-license-upload="{{ registration.license_upload.url }}">View</a>
                     <a href="{% url 'approve_student' registration.id %}" class="btn btn-success btn-sm">Approve</a>
-                    <a href="#" class="btn btn-danger btn-sm">Reject</a>
+                    <a href="{% url 'reject_student' registration.id %}" class="btn btn-danger btn-sm">Reject</a>
+
                 </td>
                 
             </tr>
@@ -89,7 +90,9 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Initialize DataTable
+   // Check if the registrations table has any rows with actual content
+   if ($('#registrationsTable tbody tr').text().trim() !== "") {
+    // Initialize DataTable if rows with content exist
     $('#registrationsTable').DataTable({
         "autoWidth": true,  // Set to true instead of false
         "columnDefs": [
@@ -99,9 +102,9 @@
             { "width": "20%", "targets": 3 },
             { "width": "35%", "targets": 4 }  // Actions column might need more width
         ]
-      });
-      
-  
+    });
+}
+});
     // Modal data population
     var studentModal = document.getElementById('studentModal');
     studentModal.addEventListener('show.bs.modal', function (event) {

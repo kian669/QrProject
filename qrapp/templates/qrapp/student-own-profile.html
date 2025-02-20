@@ -129,6 +129,7 @@
                             <input type="text" class="form-control" id="course" name="course" value="{{ student.course }}">
                         </div>
                     </div>
+
                     <div class="mb-3">
                         <label for="year" class="form-label">Year</label>
                         <div class="input-group">
@@ -137,12 +138,27 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="major" class="form-label">Major</label>
+                        <label for="major" class="form-label">Contact Number</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-book"></i></span>
                             <input type="text" class="form-control" id="major" name="major" value="{{ student.major }}">
                         </div>
                     </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password" >
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirm_password" placeholder="Confirm new password">
+                        </div>
+                    </div>
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -302,6 +318,16 @@
             var imageUrl = link.data('image'); // Extract image URL from data-attribute
             var modalImage = $('#modalImage'); // Find the image element inside the modal
             modalImage.attr('src', imageUrl); // Set the image source to the clicked link's data
+        });
+        const form = document.querySelector('#updateProfileModal form');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+
+        form.addEventListener('submit', function (e) {
+            if (password.value !== confirmPassword.value) {
+                e.preventDefault(); // Prevent form submission
+                alert('Passwords do not match. Please check and try again.');
+            }
         });
     });
 </script>

@@ -1,4 +1,24 @@
 {% extends 'qrapp/base.html' %}
+{% load static %}
 {% block content %}
-<p> Employee Dashboard </p>
+    <!-- Add a readable, modern font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <div class="container mt-5">
+        <div class="text-center mb-4">
+            <h1 class="display-4" style="font-family: 'Poppins', sans-serif; color: #005f73;">
+                <i class="fas fa-user-circle"></i> Welcome back, {{ request.session.full_name }}!
+            </h1>
+            <p class="lead text-muted" style="font-family: 'Open Sans', sans-serif;">
+                <i class="fas fa-thumbs-up"></i> It's great to have you back. Your dedication and hard work continue to make a difference. 
+                As a valued member of our team, we are confident that together we will continue to achieve remarkable success.
+            </p>
+        </div>
+        <div class="text-center mb-4">
+            <p class="lead" style="font-family: 'Open Sans', sans-serif;">
+                <i class="fas fa-briefcase"></i> Keep an eye on key updates, important reports, and collaborative projects as you navigate the dashboard. 
+                Your efforts play a pivotal role in driving the company forward.
+            </p>
+        </div>
+    </div>
 {% endblock %}

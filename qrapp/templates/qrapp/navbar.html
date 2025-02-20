@@ -78,6 +78,14 @@
             </a>
         </li>
         <li>
+            <a href="{% url 'security-list' %}">
+                <span class="icon">
+                    <ion-icon name="shield-checkmark-outline"></ion-icon>
+                </span>
+                <span class="title">Security List</span>
+            </a>
+        </li>
+        <li>
             <a href="{% url 'all-vehicles' %}">
                 <span class="icon">
                     <ion-icon name="car-outline"></ion-icon>
@@ -223,7 +231,7 @@
             </a>
         </li>
         <li>
-            <a href="#">
+            <a href="{% url 'security-own-profile' %}">
                 <span class="icon">
                     <ion-icon name="chatbubble-outline"></ion-icon>
                 </span>
@@ -506,7 +514,7 @@
         </li>
       
         <li>
-            <a href="#">
+            <a href="{% url 'employee-own-profile' %}">
                 <span class="icon">
                     <ion-icon name="chatbubble-outline"></ion-icon>
                 </span>
@@ -809,7 +817,7 @@
                     <ul class="dropdown">
                         <li><a href="{% url 'stud-reg' %}" class="dropdown-link">Student Registration</a></li>
                         <li><a href="{% url 'employee-reg' %}" class="dropdown-link">Employee Registration</a></li>    
-                        <li><a href="#" class="dropdown-link">Security Registration</a></li>
+                        <li><a href="{% url 'register_security' %}" class="dropdown-link">Security Registration</a></li>
                         {% comment %} <li><a href="{% url 'head-login'%}" class="dropdown-link">Head of Security</a></li>
                         <li><a href="{% url 'unified-login'%}" class="dropdown-link">Unified Login</a></li> {% endcomment %}
                        

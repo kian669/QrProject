@@ -127,6 +127,25 @@ def submit_employee_violation(request):
     
     return JsonResponse({'success': False})
 
+def security_list(request):
+    securities = Security.objects.all()
+    return render(request, 'qrapp/security-list.html', {'securities': securities})
+
+
+def toggle_security_status(request):
+    if request.method == 'POST':
+        security_id = request.POST.get('security_id')
+        is_active = request.POST.get('is_active') == 'true'
+
+        try:
+            security = Security.objects.get(id=security_id)
+            security.is_active = is_active
+            security.save()
+            status = "activated" if is_active else "deactivated"
+            return JsonResponse({'message': f'Security personnel successfully {status}!'})
+        except Security.DoesNotExist:
+            return JsonResponse({'message': 'Security personnel not found!'}, status=404)
+    return JsonResponse({'message': 'Invalid request method!'}, status=400)
 
 
 def employee_list(request):
@@ -447,23 +466,35 @@ def student_own_profile(request):
     return render(request, 'qrapp/student-own-profile.html', {'student': student, 'vehicles': vehicles,  'logs': logs , 'violations': violations})
 
 
+
 def update_student_profile(request):
     if request.method == 'POST':
         student_id = request.session.get('student_id')
         student = get_object_or_404(StudentMasterList, student_id=student_id)
-        
+
+        # Update profile fields
         student.first_name = request.POST.get('first_name', student.first_name)
         student.last_name = request.POST.get('last_name', student.last_name)
         student.email = request.POST.get('email', student.email)
         student.course = request.POST.get('course', student.course)
         student.year = request.POST.get('year', student.year)
         student.major = request.POST.get('major', student.major)
+
+        # Update password if provided
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        if password and confirm_password:
+            if password == confirm_password:
+                student.password = make_password(password)
+            else:
+                messages.error(request, 'Passwords do not match.')
+                return redirect('student-own-profile')  # Adjust the URL name as needed
+
         student.save()
-
         messages.success(request, 'Profile updated successfully!')
-        return redirect('student-own-profile')  # Adjust the URL name as needed
+        return redirect('student-own-profile')
 
-    return redirect('student-own-profile')  # Redirect if not POST
+    return redirect('student-own-profile')
 
 def login_stud(request):
     
@@ -773,8 +804,6 @@ def student_details(request):
     except StudentMasterList.DoesNotExist:
         return JsonResponse({'error': 'Student not found'}, status=404)
     
-
-
 def security_login(request):
     if request.method == 'POST':
         form = SecurityLoginForm(request.POST)
@@ -804,7 +833,71 @@ def security_login(request):
     else:
         form = SecurityLoginForm()
 
-    return render(request, 'qrapp/security-login.html', {'form': form})
+    return render(request, 'qrapp/security-login.html', {'form': form}) 
+
+
+def security_own_profile(request):
+    # Check if the logged-in user is a security officer
+    if request.session.get('user_type') == 'security':
+        username = request.session.get('username')
+        try:
+            officer = Security.objects.get(username=username)
+        except Security.DoesNotExist:
+            officer = None
+        
+        return render(request, 'qrapp/security-own-profile.html', {'officer': officer})
+    else:
+        # Redirect to login if not authenticated as a security officer
+        return redirect('unified_login')
+
+def update_security_profile(request):
+    if request.session.get('user_type') == 'security':
+        username = request.session.get('username')
+        try:
+            officer = Security.objects.get(username=username)
+        except Security.DoesNotExist:
+            messages.error(request, "Security officer not found.")
+            return redirect('security-own-profile')
+
+        if request.method == 'POST':
+            # Update text fields
+            officer.first_name = request.POST.get('first_name')
+            officer.last_name = request.POST.get('last_name')
+            officer.username = request.POST.get('username')
+
+            # Update profile picture
+            if 'picture' in request.FILES:
+                officer.picture = request.FILES['picture']
+
+            # Validate and update password
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+            if password and confirm_password:
+                if password == confirm_password:
+                    officer.password = make_password(password)
+                else:
+                    messages.error(request, "Passwords do not match.")
+                    return render(request, 'qrapp/security-own-profile.html', {'officer': officer})
+
+            officer.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect('security-own-profile')
+
+        return render(request, 'qrapp/security-profile.html', {'officer': officer})
+    else:
+        return redirect('unified_login')
+    
+
+def reject_student(request, student_id):
+    # Fetch the student registration by ID
+    student = get_object_or_404(Student, id=student_id)
+    
+    # Delete the student registration (rejecting the student)
+    student.delete()
+
+    # After rejection, redirect back to the list of pending registrations
+    return redirect('pending-registration')  # Replace 'pending-registration' with your URL name
+
 
 
 def security_dashboard(request):
@@ -1110,20 +1203,6 @@ def violation_list(request):
     employee_violations = EmployeeViolation.objects.all()
     return render(request, 'qrapp/violations.html', {'violations': violations,'employee_violations': employee_violations})
 
-def reject_student(request, student_id):
-    # Fetch the student record or return a 404 error if not found
-    student = get_object_or_404(StudentMasterList, id=student_id)
-    
-    # Optionally, you can perform additional actions here, e.g., logging the rejection
-
-    # Delete the student record
-    student.delete()
-    
-    # Add a success message to inform the user
-    messages.success(request, 'The registration has been successfully rejected.')
-    
-    # Redirect to the pending registrations page or another page as needed
-    return redirect('pending_registrations')  # Make sure to replace 'pending_registrations' with your actual URL name
 
 
 def my_vehicle(request):
@@ -1159,3 +1238,78 @@ def add_vehicle(request):
     return render(request, 'qrapp/add_vehicle.html', {'form': form})
 
 
+
+def register_security(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        picture = request.FILES.get('picture')
+
+        # Validation
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'qrapp/register_security.html')
+
+        if Security.objects.filter(username=username).exists():
+            messages.error(request, "Username already exists.")
+            return render(request, 'qrapp/register_security.html')
+
+        # Save Security officer (Removed confirm_password from the model)
+        security = Security(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            password=make_password(password),  # Hash password before saving
+            picture=picture
+        )
+        security.save()
+
+        messages.success(request, "Security officer registered successfully.")
+        return redirect('register_security')  # Update this redirect as needed
+
+    return render(request, 'qrapp/register_security.html')
+
+def employee_own_profile(request):
+    # Check if the logged-in user is an employee
+    if request.session.get('user_type') == 'employee':
+        try:
+            employee_id = request.session.get('employee_id')
+            employee = Employee.objects.get(id=employee_id)
+            return render(request, 'qrapp/employee-own-profile.html', {'employee': employee})
+        except Employee.DoesNotExist:
+            return redirect('unified-login')  # Redirect to login if employee not found
+    else:
+        return redirect('unified-login')  # Redirect to login if user is not an employee
+    
+    
+
+def update_employee_profile(request):
+    if request.method == 'POST':
+        employee_id = request.session.get('employee_id')
+        try:
+            employee = Employee.objects.get(id=employee_id)
+            # Update specific fields
+            employee.contact_number = request.POST.get('contact_number')
+            employee.username = request.POST.get('username')
+
+            # Handle password update
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+
+            if new_password:
+                if new_password == confirm_password:
+                    employee.password = make_password(new_password)  # Hash password
+                else:
+                    # Passwords don't match, handle accordingly
+                    messages.error(request, "Passwords do not match.")
+                    return redirect('employee-own-profile')
+
+            employee.save()
+            messages.success(request, "Profile updated successfully.")
+            return redirect('employee-own-profile')
+        except Employee.DoesNotExist:
+            return redirect('unified-login')  # Redirect if employee not found
+    return redirect('employee-own-profile')

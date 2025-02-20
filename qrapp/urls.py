@@ -11,7 +11,7 @@ from .views import submit_employee_violation
 from .views import reject_student
 from . import views 
 from .views import approve_student, activate_student, unified_login, logs_analytics_data,employee_violations_analytics
-from .views import student_violations_analytics
+from .views import student_violations_analytics,toggle_security_status
 
 
 
@@ -69,7 +69,15 @@ urlpatterns = [
     path('employee-violations-analytics/', employee_violations_analytics, name='employee_violations_analytics'),
     path('student-own-profile/', views.student_own_profile, name="student-own-profile"),
      path('update-profile/', views.update_student_profile, name='update_student_profile'),
-    
+     path('register-security/', views.register_security, name='register_security'),
+     path('security-own-profile/', views.security_own_profile, name='security-own-profile'),
+     path('update-security-profile/', views.update_security_profile, name='update_security_profile'),
+    path('reject/<int:student_id>/', views.reject_student, name='reject_student'),
+    path('employee-own-profile/', views.employee_own_profile, name='employee-own-profile'),
+     path('employee/profile/update/', views.update_employee_profile, name='update-employee-profile'),
+     path('security-list', views.security_list, name='security-list'),
+     path('toggle-security-status/', toggle_security_status, name='toggle_security_status'),
+     
 ]
 
 if settings.DEBUG:

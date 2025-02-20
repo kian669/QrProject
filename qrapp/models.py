@@ -82,21 +82,14 @@ class Security(models.Model):
     picture = models.ImageField(upload_to='security_pictures/', blank=True, null=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
-    username = models.CharField(max_length=30, unique=True, default='default_username')
+    username = models.CharField(max_length=30, unique=True)
     password = models.CharField(max_length=128)
-    confirm_password = models.CharField(max_length=128)
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.username})"
 
     def save(self, *args, **kwargs):
-        # Ensure password and confirm_password are hashed before saving
         if not self.password.startswith('pbkdf2_sha256$'):
             self.password = make_password(self.password)
-        if not self.confirm_password.startswith('pbkdf2_sha256$'):
-            self.confirm_password = make_password(self.confirm_password)
-
         super(Security, self).save(*args, **kwargs)
+
     
 class Violation(models.Model):
     username = models.CharField(max_length=50)
